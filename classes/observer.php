@@ -14,34 +14,40 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace auth_companion\output;
+namespace auth_companion;
 use \auth_companion\globals as gl;
 
 /**
- * Renderable and templatable component base class.
+ * Observer for events.
  *
  * @package    auth_companion
  * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
  * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class base implements \renderable, \templatable {
-
-    /** @var array */
-    protected $data;
+class observer {
 
     /**
-     * Constructor.
-     */
-    public function __construct() {
-        $this->data = array();
-    }
-
-    /**
-     * Export the data for usage in mustache.
+     * Delete linked companion accounts for the deleted user.
      *
-     * @param \renderer_base $output
-     * @return array
+     * @param \core\event\user_deleted $event
+     * @return boolean
      */
-    abstract public function export_for_template(\renderer_base $output);
+    public static function user_deleted(\core\event\user_deleted $event) {
+        $DB = gl::db();
+
+        if (!is_enabled_auth(gl::AUTH)) {
+            return true;
+        }
+        $userid = $event->objectid;
+        $deleteduser = $event->get_record_snapshot('user', $userid);
+        if ($deleteduser->auth == gl::AUTH) {
+            return; // Companion accounts do not have a companion too.
+        }
+
+        // Is there a related companion account?
+        if ($companionrecord = $DB->get_record('auth_companion_accounts', array('mainuserid' => $userid))) {
+            \auth_companion\util::delete_companionuser($companionrecord->companionid);
+        }
+    }
 }

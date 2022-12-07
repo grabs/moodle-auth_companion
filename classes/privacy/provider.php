@@ -14,19 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * @package   auth_companion
- * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace auth_companion\privacy;
-defined('MOODLE_INTERNAL') || die();
+
 /**
  * Privacy Subsystem for auth_companion implementing null_provider.
  *
- * @copyright  2018 Carlos Escobedo <carlos@moodle.com>
+ * @package    auth_companion
+ * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements \core_privacy\local\metadata\null_provider {

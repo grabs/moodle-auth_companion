@@ -14,23 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * @package   auth_companion
- * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace auth_companion;
 use \auth_companion\globals as gl;
 
 /**
  * Provide a set of static methods.
  *
- * @copyright  2022 Andreas Grabs EDV-Beratung
+ * @package    auth_companion
+ * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class util {
+    /**
+     * Modify the user menu by adding the "switch to" or "switch back" buttons.
+     *
+     * @return void
+     */
     public static function set_user_menu() {
         $CFG = gl::cfg();
         $PAGE = gl::page();
@@ -71,15 +71,26 @@ class util {
         return;
     }
 
+    /**
+     * Checks whether or not the given user is a companion account.
+     *
+     * @param \stdClass|null $user
+     * @return bool
+     */
     public static function is_companion($user = null) {
         $USER = gl::user();
 
         if (empty($user)) {
             $user = $USER;
         }
-        return $USER->auth == 'companion';
+        return $USER->auth == gl::AUTH;
     }
 
+    /**
+     * Checks whether or not the current page is a course page.
+     *
+     * @return bool
+     */
     public static function page_is_course() {
         $PAGE = gl::page();
         if ($PAGE->context->contextlevel != CONTEXT_COURSE) {
@@ -91,7 +102,14 @@ class util {
         return true;
     }
 
-    public static function delete_user($userid) {
+    /**
+     * Delete the companion account
+     *
+     * @throws \moodle_exception
+     * @param int $userid
+     * @return void
+     */
+    public static function delete_companionuser(int $userid) {
         $DB = gl::db();
         $CFG = gl::cfg();
         $mycfg = gl::mycfg();
@@ -99,18 +117,72 @@ class util {
         if (is_siteadmin($userid)) {
             throw new \moodle_exception('useradminodelete', 'error');
         }
-        $user = $DB->get_record('user', array('id'=>$userid, 'mnethostid'=>$CFG->mnet_localhost_id), '*', MUST_EXIST);
+        $params = array(
+            'id'         => $userid,
+            'auth'       => gl::AUTH,
+            'deleted'    => 0,
+            'mnethostid' => $CFG->mnet_localhost_id
+        );
+        if ($user = $DB->get_record('user', $params, '*', IGNORE_MISSING)) {
+            // First we anonymize the username and email.
+            $anonymousname = $mycfg->anonymousname ?? 'anonymous';
+            $user->firstname = $anonymousname;
+            $user->lastname = $anonymousname;
+            $user->email = $anonymousname . '.' . $anonymousname . '@auth-companion.invalid';
+            $DB->update_record('user', $user);
 
-        // First we anonymize the username and email.
-        $anonymousname = empty($mycfg->anonymousname) ? 'anonymous' : $mycfg->anonymousname;
-        $user->firstname = $anonymousname;
-        $user->lastname = $anonymousname;
-        $user->email = $anonymousname . '.' . $anonymousname . '@auth-companion.invalid';
-        $DB->update_record('user', $user);
-
-        if (!delete_user($user)) {
-            throw new \moodle_exception('could not delete user');
+            if (!delete_user($user)) {
+                throw new \moodle_exception('could not delete user');
+            }
+            $DB->set_field('user', 'auth', 'nologin', array('id' => $userid));
         }
+
+        $DB->delete_records('auth_companion_accounts', array('companionid' => $userid));
         \core\session\manager::gc(); // Remove stale sessions.
+    }
+
+    /**
+     * Delete all unrelated companion accounts.
+     *
+     * @return void
+     */
+    public static function clean_old_accounts() {
+        $DB = gl::db();
+        $sql = 'SELECT c.*, u.id AS relateduserid
+                FROM {auth_companion_accounts} c
+                LEFT JOIN {user} u ON c.mainuserid = u.id AND u.deleted = 0
+                WHERE u.id IS NULL
+        ';
+
+        $recordset = $DB->get_recordset_sql($sql, null);
+        foreach ($recordset as $record) {
+            // There is no real user related to this record.
+            try {
+                static::delete_companionuser($record->companionid);
+            } catch (\moodle_exception $e) {
+                $DB->delete_records('auth_companion_accounts', array('companionid' => $record->companionid));
+            }
+        }
+        $recordset->close();
+
+    }
+
+    /**
+     * Get role options for usage in a select form element.
+     *
+     * @param string $capability
+     * @param \context $context
+     * @return array The roles array with localized names.
+     */
+    public static function get_roles_options(string $capability, \context $context) {
+        if (!$roles = get_roles_with_capability($capability, CAP_ALLOW, $context)) {
+            return array();
+        }
+        $return = array();
+        foreach ($roles as $role) {
+            $return[$role->id] = $role->shortname;
+        }
+
+        return role_fix_names($return, $context);
     }
 }

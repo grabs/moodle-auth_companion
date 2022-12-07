@@ -14,26 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * @package   auth_companion
- * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace auth_companion;
 use \auth_companion\globals as gl;
 
 /**
  * Represents a companion user.
  *
- * @copyright  2022 Andreas Grabs EDV-Beratung
+ * @package    auth_companion
+ * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class companion {
-    private $companion;
-    private $mainuserid;
+    /** @var \stdClass */
+    protected $companion;
+    /** @var int */
+    protected $mainuserid;
 
+    /**
+     * Constructor
+     *
+     * @param \stdClass|null $user
+     * @param bool $forcecreate
+     */
     public function __construct($user = null, $forcecreate = false) {
         $USER = gl::user();
 
@@ -42,20 +45,21 @@ class companion {
         }
         $this->mainuserid = $user->id;
         $this->companion = self::get_companion_record($user, $forcecreate);
-        if ($forcecreate) {
-            set_user_preference('auth_companion_user', $this->get_id(), $user);
-        }
     }
 
+    /**
+     * Login the companion account
+     *
+     * @throws \moodle_exception
+     * @return \stdClass|bool The user record or false.
+     */
     public function login() {
         $DB = gl::db();
-        // $SESSION = gl::session();
 
         if (!is_enabled_auth(gl::AUTH)) {
-            return;
+            return false;
         }
 
-        // $SESSION->auth_companion_login = true;
         $password = generate_password();
         $this->companion->password = hash_internal_user_password($password);
         $DB->update_record('user', $this->companion);
@@ -68,13 +72,17 @@ class companion {
         return $user;
     }
 
+    /**
+     * Login back with the main account
+     *
+     * @return \stdClass|bool The main account record or false
+     */
     public function relogin_main() {
         $DB = gl::db();
         $CFG = gl::cfg();
-        // $SESSION = gl::session();
 
         if (!is_enabled_auth(gl::AUTH)) {
-            return;
+            return false;
         }
 
         $user = $DB->get_record('user', array('id' => $this->mainuserid));
@@ -83,7 +91,15 @@ class companion {
         return $user;
     }
 
-    public function enrol($course) {
+    /**
+     * Enrol the companion account into the given course
+     *
+     * @throws \moodle_exception
+     * @param \stdClass $course The course the account is enrolled to
+     * @param int $roleid
+     * @return void
+     */
+    public function enrol($course, $roleid) {
         $manual = enrol_get_plugin('manual');
 
         $coursecontext = \context_course::instance($course->id);
@@ -99,29 +115,54 @@ class companion {
         if (!$instancefound) {
             throw new \moodle_exception('No manual instance found!');
         }
-        $manual->enrol_user($instance, $this->companion->id, null, 0, 0);
 
+        $manual->enrol_user($instance, $this->companion->id, null, 0, 0);
+        $unassignparams = array(
+            'userid' => $this->companion->id,
+            'contextid' => $coursecontext->id,
+        );
+        role_unassign_all($unassignparams, true);
+        role_assign($roleid, $this->companion->id, $coursecontext->id);
     }
 
+    /**
+     * Get the id of the companion account. This in fact is a userid of this account.
+     *
+     * @return int
+     */
     public function get_id() {
         return $this->companion->id;
     }
 
+    /**
+     * Get the record of the companion account
+     *
+     * @param \stdClass $user The record of the user the companion is related to.
+     * @param boolean $forcecreate
+     * @return \stdClass The companion account record
+     */
     protected static function get_companion_record($user, $forcecreate = false) {
         $DB = gl::db();
         $mycfg = gl::mycfg();
 
         // Does a companion user exist?
-        $companionusername = $user->id . gl::USERNAME_SUFFIX;
-        if ($companion = $DB->get_record('user', array('username' => $companionusername, 'auth' => 'companion'))) {
+        $companionid = static::get_companion_id_from_user($user);
+        $params = array(
+            'id'      => $companionid,
+            'auth'    => gl::AUTH,
+            'deleted' => 0,
+        );
+        if ($companion = $DB->get_record('user', $params)) {
             return $companion;
         }
 
+        // The companion user does not exist yet.
         $companion = new \stdClass();
-        $companion->username = $companionusername;
+        $companion->username = \core\uuid::generate(); // Get a unique username.
         $companion->password = generate_password();
         if ($forcecreate) {
-            $newrecord = create_user_record($companion->username, $companion->password, 'companion');
+            $newrecord = create_user_record($companion->username, $companion->password, gl::AUTH);
+            self::set_companion_id_for_user($user, $newrecord->id);
             foreach ($newrecord as $key => $val) {
                 $companion->{$key} = $val;
             }
@@ -134,28 +175,71 @@ class companion {
     }
 
     /**
-     * Get an instance from the current companion account.
-     * The main account has a user preference "auth_companion_user" which is the id of the companion user.
-     * The current logged in companion user has the user preference "auth_companion_mainuser".
-     * The current companion can only login back to the real user if the stored preferences are right.
+     * Get a companion id from a user
      *
-     * @param \stdClass $companion
+     * @param \stdClass $user
+     * @return int
+     */
+    protected static function get_companion_id_from_user($user) {
+        $DB = gl::db();
+
+        if ($companionlink = $DB->get_record('auth_companion_accounts', array('mainuserid' => $user->id))) {
+            return (int) $companionlink->companionid;
+        }
+        return 0;
+    }
+
+    /**
+     * Get the user id of a companion account
+     *
+     * @param int $companionid
+     * @return int
+     */
+    protected static function get_user_id_from_companion($companionid) {
+        $DB = gl::db();
+
+        if ($companionlink = $DB->get_record('auth_companion_accounts', array('companionid' => $companionid))) {
+            return (int) $companionlink->mainuserid;
+        }
+        return 0;
+    }
+
+    /**
+     * Set the companion id for a user
+     *
+     * @param \stdClass $user
+     * @param int $companionid
+     * @return bool
+     */
+    protected static function set_companion_id_for_user($user, $companionid) {
+        $DB = gl::db();
+
+        if ($companionlink = $DB->get_record('auth_companion_accounts', array('mainuserid' => $user->id))) {
+            return $DB->set_field('auth_companion_accounts', 'companionid', $companionid, array('mainuserid' => $user->id));
+        }
+        $companionlink = new \stdClass();
+        $companionlink->mainuserid = $user->id;
+        $companionlink->companionid = $companionid;
+        $companionlink->timecreated = time();
+        return (bool) $DB->insert_record('auth_companion_accounts', $companionlink);
+    }
+
+    /**
+     * Get an instance from the current companion account.
+     * The main account has an companionid stored in table auth_companion_accounts.
+     *
+     * @param int $companionuserid
      * @return static
      */
     public static function get_instance_by_companion($companionuserid) {
         $DB = gl::db();
 
         // First we get the id of the related main user.
-        $mainuserid = get_user_preferences('auth_companion_mainuser', null, $companionuserid);
+        $mainuserid = self::get_user_id_from_companion($companionuserid);
 
-        // Check whether or not the current companion is related to the main user.
-        // This is done by checking the user preference "auth_companion_user" of the main user.
-        // This id must be the id of the current companion user.
-        $companionid = get_user_preferences('auth_companion_user', null, $mainuserid);
-        if ($companionid != $companionuserid) {
+        if (empty($mainuser = $DB->get_record('user', array('id' => $mainuserid), '*', MUST_EXIST))) {
             throw new \moodle_exception('wrong userid');
         }
-        $mainuser = $DB->get_record('user', array('id' => $mainuserid), '*', MUST_EXIST);
         return new static($mainuser);
     }
 }

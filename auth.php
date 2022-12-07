@@ -14,13 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * @package   auth_companion
- * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/authlib.php');
@@ -28,16 +21,21 @@ use \auth_companion\globals as gl;
 
 /**
  * Plugin for no authentication - disabled user.
+ * @package    auth_companion
+ * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class auth_plugin_companion extends auth_plugin_base {
 
+    /** Component name of this plugin */
     public const COMPONENT = 'auth_'.gl::AUTH;
 
     /**
      * Constructor.
      */
     public function __construct() {
-        $this->authtype = 'companion';
+        $this->authtype = gl::AUTH;
         $this->config = get_config(self::COMPONENT);
 
         // Force some profile fields to locked.
@@ -70,14 +68,15 @@ class auth_plugin_companion extends auth_plugin_base {
     /**
      * Do not allow any login.
      *
+     * @param string $username
+     * @param string $password
+     * @return bool
      */
-    function user_login($username, $password) {
-        // global $CFG, $DB, $SESSION;
-        global $CFG, $DB;
-        // if (empty($SESSION->auth_companion_login)) {
-        //     return false;
-        // }
-        if (!$user = $DB->get_record('user', array('username'=>$username, 'mnethostid'=>$CFG->mnet_localhost_id))) {
+    public function user_login($username, $password) {
+        $CFG = gl::cfg();
+        $DB = gl::db();
+
+        if (!$user = $DB->get_record('user', array('username' => $username, 'mnethostid' => $CFG->mnet_localhost_id))) {
             return false;
         }
         if (!validate_internal_user_password($user, $password)) {
@@ -88,13 +87,21 @@ class auth_plugin_companion extends auth_plugin_base {
 
     /**
      * No password updates.
+     *
+     * @param \stdClass $user
+     * @param string $newpassword
+     * @return bool
      */
-    function user_update_password($user, $newpassword) {
+    public function user_update_password($user, $newpassword) {
         return false;
     }
 
-    function prevent_local_passwords() {
-        // just in case, we do not want to loose the passwords
+    /**
+     * Prevent local passwords
+     *
+     * @return bool
+     */
+    public function prevent_local_passwords() {
         return false;
     }
 
@@ -103,8 +110,7 @@ class auth_plugin_companion extends auth_plugin_base {
      *
      * @return bool
      */
-    function is_internal() {
-        //we do not know if it was internal or external originally
+    public function is_internal() {
         return true;
     }
 
@@ -113,14 +119,14 @@ class auth_plugin_companion extends auth_plugin_base {
      *
      * @return bool
      */
-    function can_change_password() {
+    public function can_change_password() {
         return false;
     }
 
     /**
      * No password resetting.
      */
-    function can_reset_password() {
+    public function can_reset_password() {
         return false;
     }
 
@@ -129,7 +135,7 @@ class auth_plugin_companion extends auth_plugin_base {
      *
      * @return bool
      */
-    function can_be_manually_set() {
+    public function can_be_manually_set() {
         return true;
     }
 

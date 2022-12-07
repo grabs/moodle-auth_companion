@@ -15,13 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   auth_companion
- * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Language definition
+ *
+ * @package    auth_companion
+ * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['auth_companiondescription'] = 'Auth plugin that allows logged in users to use a companion account.';
+$string['clean_old_companion_accounts'] = 'Clean old companion accounts';
+$string['companion:allowcompanion'] = 'Allow companion account';
+$string['companion:useascompanion'] = 'Use this role for companion account';
+$string['companionrole'] = 'Companion role';
 $string['delete_data'] = 'Delete data';
 $string['info_using_companion'] = 'You are now using your companion account "<strong>{$a}</strong>".';
 $string['info_using_origin'] = 'You are now using your origin account "<strong>{$a}</strong>".';
@@ -35,3 +41,4 @@ $string['switch_back'] = 'Switch back';
 $string['switch_back_text'] = 'Switch back to your origin account.';
 $string['switch_to_companion'] = 'Switch to companion';
 $string['switch_to_companion_text'] = 'Your current login will be changed to your companion account.';
+$string['wrong_or_missing_role'] = 'Wrong or missing companion role';

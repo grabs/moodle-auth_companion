@@ -14,13 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * @package   auth_companion
- * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace auth_companion\form;
 use \auth_companion\globals as gl;
 
@@ -31,7 +24,9 @@ require_once($CFG->libdir.'/formslib.php');
 /**
  * Base form class.
  *
- * @copyright  2020 Andreas Grabs EDV-Beratung
+ * @package    auth_companion
+ * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class base extends \moodleform implements \renderable, \templatable {

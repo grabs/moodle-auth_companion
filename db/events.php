@@ -14,34 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace auth_companion\output;
-use \auth_companion\globals as gl;
-
 /**
- * Renderable and templatable component base class.
- *
+ * Event definitions.
  * @package    auth_companion
  * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
  * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class base implements \renderable, \templatable {
 
-    /** @var array */
-    protected $data;
+defined('MOODLE_INTERNAL') || die();
 
-    /**
-     * Constructor.
-     */
-    public function __construct() {
-        $this->data = array();
-    }
+$observers = array(
 
-    /**
-     * Export the data for usage in mustache.
-     *
-     * @param \renderer_base $output
-     * @return array
-     */
-    abstract public function export_for_template(\renderer_base $output);
-}
+    array(
+        'eventname' => '\core\event\user_deleted',
+        'callback'  => '\auth_companion\observer::user_deleted',
+    ),
+);

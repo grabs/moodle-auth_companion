@@ -15,17 +15,18 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   auth_companion
- * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Collection of functions.
+ *
+ * @package    auth_companion
+ * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 use \auth_companion\globals as gl;
-defined('MOODLE_INTERNAL') || die();
 
 /**
- * Fumble with Moodle's global navigation by leveraging Moodle's *_extend_navigation_course() hook.
+ * Modify the user navigation.
  *
  * @param navigation_node $navigation
  */

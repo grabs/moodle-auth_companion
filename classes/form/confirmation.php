@@ -14,23 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * @package   auth_companion
- * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace auth_companion\form;
 use \auth_companion\globals as gl;
 
 /**
  * Confirmation form.
  *
- * @copyright  2020 Andreas Grabs EDV-Beratung
+ * @package    auth_companion
+ * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class confirmation extends base {
+
+    /** @var string The values can be 'enter' or 'leave'. */
+    protected $type;
+    /** @var \array */
+    protected $companionroles;
 
     /**
      * Form definition.
@@ -38,17 +38,16 @@ class confirmation extends base {
      * @return void
      */
     public function definition() {
-        $CFG = gl::cfg();
-        $OUTPUT = gl::output();
 
         $mform = $this->_form;
         $customdata = $this->_customdata;
-        $courseid = (int) empty($customdata['courseid']) ? 0 : $customdata['courseid'];
+        $courseid = (int) ($customdata['courseid'] ?? 0);
 
-        $backurl = empty($customdata['backurl']) ? '/' : $customdata['backurl'];
+        $this->type = $customdata['type'] ?? '';
+        $this->companionroles = $customdata['companionroles'] ?? array();
+
+        $backurl = $customdata['backurl'] ?? '/';
         $backurl = new \moodle_url($backurl);
-
-        $type = $customdata['type'];
 
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
@@ -62,16 +61,39 @@ class confirmation extends base {
         $mform->setType('confirm', PARAM_BOOL);
         $mform->setConstant('confirm', true);
 
-        if ($type == 'leave') {
-            $mform->addElement('checkbox', 'deletedata', get_string('delete_data', 'auth_companion'));
+        switch ($this->type) {
+            case 'leave':
+                $mform->addElement('checkbox', 'deletedata', get_string('delete_data', 'auth_companion'));
+                $actionbuttonstring = get_string('switch_back', 'auth_companion');
+                break;
+            case 'enter':
+                $mform->addElement('select', 'companionrole', get_string('companionrole', 'auth_companion'), $this->companionroles);
+                $actionbuttonstring = get_string('switch_to_companion', 'auth_companion');
+                break;
+            default:
+                throw new \moodle_exception('unknown confirmation type');
         }
+        $this->add_action_buttons(true, $actionbuttonstring);
+    }
 
-        if ($type == 'leave') {
-            $this->add_action_buttons(true, get_string('switch_back', 'auth_companion'));
-        } else if ($type == 'enter') {
-            $this->add_action_buttons(true, get_string('switch_to_companion', 'auth_companion'));
-        } else {
-            throw new \moodle_exception('unknown confirmation type');
+    /**
+     * Validation of submitted content.
+     *
+     * @param array $data array of ("fieldname"=>value) of submitted data
+     * @param array $files array of uploaded files "element_name"=>tmp_file_path
+     * @return array of "element_name"=>"error_description" if there are errors,
+     *         or an empty array if everything is OK (true allowed for backwards compatibility too).
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        $data = (object) $data;
+
+        if ($this->type == 'enter') {
+            if (empty($this->companionroles) || !in_array($data->companionrole, array_keys($this->companionroles))) {
+                $errors['companionrole'] = get_string('wrong_or_missing_role', 'auth_companion');
+            }
         }
+        return $errors;
     }
 }

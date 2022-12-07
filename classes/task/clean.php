@@ -14,34 +14,36 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace auth_companion\output;
+namespace auth_companion\task;
 use \auth_companion\globals as gl;
 
 /**
- * Renderable and templatable component base class.
+ * Scheduled task for removing unrelated companion accounts.
  *
  * @package    auth_companion
  * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
  * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class base implements \renderable, \templatable {
-
-    /** @var array */
-    protected $data;
+class clean extends \core\task\scheduled_task {
 
     /**
-     * Constructor.
+     * Get a descriptive name for this task (shown to admins).
+     *
+     * @return string
      */
-    public function __construct() {
-        $this->data = array();
+    public function get_name() {
+        return get_string('clean_old_companion_accounts', 'auth_companion');
     }
 
     /**
-     * Export the data for usage in mustache.
-     *
-     * @param \renderer_base $output
-     * @return array
+     * Run users sync.
      */
-    abstract public function export_for_template(\renderer_base $output);
+    public function execute() {
+        if (!is_enabled_auth(gl::AUTH)) {
+            return;
+        }
+        \auth_companion\util::clean_old_accounts();
+    }
+
 }

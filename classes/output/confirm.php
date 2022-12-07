@@ -14,29 +14,27 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * @package   auth_companion
- * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace auth_companion\output;
 use \auth_companion\globals as gl;
 
 /**
  * Renderable and templatable component for delete box.
  *
- * @copyright  2020 Andreas Grabs EDV-Beratung
+ * @package    auth_companion
+ * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class confirm extends base {
+    /** @var \auth_companion\form\base */
     private $confirmform;
 
     /**
      * Constructor
      *
-     * @param \local_invitation\form\base $confirmform
+     * @param \auth_companion\form\base $confirmform
+     * @param string $title
+     * @param string $text
      */
     public function __construct($confirmform, $title, $text) {
         $DB = gl::db();

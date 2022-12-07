@@ -15,17 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   auth_companion
- * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Switch back to the main acount
+ *
+ * @package    auth_companion
+ * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 use \auth_companion\globals as gl;
 
 require_once(dirname(dirname(__DIR__)).'/config.php');
 
+require_login();
+
 $DB = gl::db();
+$PAGE = gl::page();
 
 $backurl = optional_param('backurl', '', PARAM_LOCALURL);
 if (empty($backurl)) {
@@ -33,10 +38,6 @@ if (empty($backurl)) {
 } else {
     $backurl = new \moodle_url($backurl);
 }
-// print_object($backurl);exit;
-// if (!$courseid = get_user_preferences('auth_companion_course')) {
-//     $courseid = SITEID;
-// }
 
 $pagetitle = get_string('pluginname', 'auth_companion');
 $title = get_string('switch_back', 'auth_companion');
@@ -48,16 +49,18 @@ $context = \context_system::instance();
 $myurl = new \moodle_url($FULLME);
 $myurl->remove_all_params();
 $myurl->param('backurl', $backurl->out());
-// $myurl->param('courseid', $courseid);
 
-/** @var \moodle_page $PAGE */
 $PAGE->set_url($myurl);
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('frontpage');
 $PAGE->set_heading($pagetitle);
 $PAGE->set_title($pagetitle);
 
-$confirmform = new \auth_companion\form\confirmation(null, array('backurl' => $backurl, 'type' => 'leave'));
+$customdata = array(
+    'backurl' => $backurl,
+    'type' => 'leave',
+);
+$confirmform = new \auth_companion\form\confirmation(null, $customdata);
 if ($confirmform->is_cancelled()) {
     redirect($backurl);
 }
@@ -74,7 +77,7 @@ if ($data = $confirmform->get_data()) {
         require_logout();
     }
     if (!empty($data->deletedata)) {
-        \auth_companion\util::delete_user($companionuserid);
+        \auth_companion\util::delete_companionuser($companionuserid);
     }
     if (!empty($user)) {
         $notificationtext = get_string('info_using_origin', 'auth_companion', fullname($user));

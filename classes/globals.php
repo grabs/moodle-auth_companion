@@ -14,29 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * @package   auth_companion
- * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace auth_companion;
 
 /**
  * Provide all globals we need.
  *
- * @copyright  2022 Andreas Grabs EDV-Beratung
+ * @package    auth_companion
+ * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class globals {
-    public const USERNAME_SUFFIX = '---------companion';
+    /** @var this auth type */
     public const AUTH = 'companion';
 
     /**
      * Returns the \moodle_database instance
      *
-     * @global \moodle_database $DB
      * @return \moodle_database
      */
     public static function db() {

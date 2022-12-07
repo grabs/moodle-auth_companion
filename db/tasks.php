@@ -15,17 +15,24 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version definition
+ * Task definition
  *
- * @package    auth_companion
- * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
- * @author     Andreas Grabs <moodle@grabs-edv.de>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   auth_companion
+ * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
+ * @author    Andreas Grabs <moodle@grabs-edv.de>
+ * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2022120700;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = 'v4.1 (2022120700)';        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2020061500;        // Requires this Moodle version.
-$plugin->component = 'auth_companion';  // Full name of the plugin.
+$tasks = array(
+    array(
+        'classname' => 'auth_companion\task\clean',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => 'R',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ),
+);
