@@ -30,7 +30,6 @@ require_once(dirname(dirname(__DIR__)).'/config.php');
 require_login();
 
 $courseid = required_param('courseid', PARAM_INT);
-$DB = gl::db();
 
 if (!$course = $DB->get_record('course', array('id' => $courseid))) {
     throw new \moodle_exception('course not found');

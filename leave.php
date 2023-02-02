@@ -29,9 +29,6 @@ require_once(dirname(dirname(__DIR__)).'/config.php');
 
 require_login();
 
-$DB = gl::db();
-$PAGE = gl::page();
-
 $backurl = optional_param('backurl', '', PARAM_LOCALURL);
 if (empty($backurl)) {
     $backurl = new \moodle_url('/');

@@ -34,7 +34,7 @@ class observer {
      * @return boolean
      */
     public static function user_deleted(\core\event\user_deleted $event) {
-        $DB = gl::db();
+        global $DB;
 
         if (!is_enabled_auth(gl::AUTH)) {
             return true;

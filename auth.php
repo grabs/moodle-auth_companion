@@ -70,19 +70,10 @@ class auth_plugin_companion extends auth_plugin_base {
      *
      * @param string $username
      * @param string $password
-     * @return bool
+     * @return bool This will always be false
      */
     public function user_login($username, $password) {
-        $CFG = gl::cfg();
-        $DB = gl::db();
-
-        if (!$user = $DB->get_record('user', array('username' => $username, 'mnethostid' => $CFG->mnet_localhost_id))) {
-            return false;
-        }
-        if (!validate_internal_user_password($user, $password)) {
-            return false;
-        }
-        return true;
+        return false;
     }
 
     /**

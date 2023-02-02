@@ -34,12 +34,10 @@ class companion_test extends \advanced_testcase {
      * @return void
      */
     public function test_create_companion_account() {
-        $DB = gl::db();
+        global $DB, $USER;
 
         $this->resetAfterTest();
         $this->setAdminUser();
-
-        $USER = gl::user();
 
         // Check the count of users and companions before.
         $countuserbefore = $DB->count_records('user', array('deleted' => 0, 'auth' => gl::AUTH));
@@ -71,12 +69,10 @@ class companion_test extends \advanced_testcase {
      * @return void
      */
     public function test_delete_companion_account() {
-        $DB = gl::db();
+        global $DB, $USER;
 
         $this->resetAfterTest();
         $this->setAdminUser();
-
-        $USER = gl::user();
 
         $companion = new \auth_companion\companion($USER, true);
         $companionid = $companion->get_id();

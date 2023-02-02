@@ -38,7 +38,7 @@ class companion {
      * @param bool $forcecreate
      */
     public function __construct($user = null, $forcecreate = false) {
-        $USER = gl::user();
+        global $USER;
 
         if (empty($user)) {
             $user = $USER;
@@ -54,17 +54,15 @@ class companion {
      * @return \stdClass|bool The user record or false.
      */
     public function login() {
-        $DB = gl::db();
 
         if (!is_enabled_auth(gl::AUTH)) {
             return false;
         }
 
-        $password = generate_password();
-        $this->companion->password = hash_internal_user_password($password);
-        $DB->update_record('user', $this->companion);
-        $user = authenticate_user_login($this->companion->username, $password);
-        if (!$user = complete_user_login($user)) {
+        // Recreate a new empty session.
+        \core\session\manager::init_empty_session(true);
+
+        if (!$user = complete_user_login($this->companion)) {
             require_logout();
             throw new \moodle_exception('could not login companion user');
         }
@@ -78,12 +76,14 @@ class companion {
      * @return \stdClass|bool The main account record or false
      */
     public function relogin_main() {
-        $DB = gl::db();
-        $CFG = gl::cfg();
+        global $DB, $CFG;
 
         if (!is_enabled_auth(gl::AUTH)) {
             return false;
         }
+
+        // Recreate a new empty session.
+        \core\session\manager::init_empty_session(true);
 
         $user = $DB->get_record('user', array('id' => $this->mainuserid));
         $user = get_complete_user_data('id', $user->id, $CFG->mnet_localhost_id);
@@ -142,7 +142,7 @@ class companion {
      * @return \stdClass The companion account record
      */
     protected static function get_companion_record($user, $forcecreate = false) {
-        $DB = gl::db();
+        global $DB;
         $mycfg = gl::mycfg();
 
         // Does a companion user exist?
@@ -171,6 +171,7 @@ class companion {
         $companion->firstname = $user->firstname;
         $companion->lastname = $user->lastname . ' ' . $mycfg->namesuffix;
         $companion->email = $companion->username . '@companion.invalid';
+        $DB->update_record('user', $companion);
         return $companion;
     }
 
@@ -181,7 +182,7 @@ class companion {
      * @return int
      */
     protected static function get_companion_id_from_user($user) {
-        $DB = gl::db();
+        global $DB;
 
         if ($companionlink = $DB->get_record('auth_companion_accounts', array('mainuserid' => $user->id))) {
             return (int) $companionlink->companionid;
@@ -196,7 +197,7 @@ class companion {
      * @return int
      */
     protected static function get_user_id_from_companion($companionid) {
-        $DB = gl::db();
+        global $DB;
 
         if ($companionlink = $DB->get_record('auth_companion_accounts', array('companionid' => $companionid))) {
             return (int) $companionlink->mainuserid;
@@ -212,7 +213,7 @@ class companion {
      * @return bool
      */
     protected static function set_companion_id_for_user($user, $companionid) {
-        $DB = gl::db();
+        global $DB;
 
         if ($companionlink = $DB->get_record('auth_companion_accounts', array('mainuserid' => $user->id))) {
             return $DB->set_field('auth_companion_accounts', 'companionid', $companionid, array('mainuserid' => $user->id));
@@ -232,7 +233,7 @@ class companion {
      * @return static
      */
     public static function get_instance_by_companion($companionuserid) {
-        $DB = gl::db();
+        global $DB;
 
         // First we get the id of the related main user.
         $mainuserid = self::get_user_id_from_companion($companionuserid);

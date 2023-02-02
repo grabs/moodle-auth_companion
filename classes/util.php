@@ -32,8 +32,7 @@ class util {
      * @return void
      */
     public static function set_user_menu() {
-        $CFG = gl::cfg();
-        $PAGE = gl::page();
+        global $CFG, $PAGE, $FULLME;
 
         // Do not manipulate the custum user menu on an admin page.
         if (preg_match('#^admin.*#', $PAGE->pagetype)) {
@@ -48,7 +47,6 @@ class util {
 
         // The user is a companion.
         if (static::is_companion()) {
-            $FULLME = gl::fullme();
             $backurl = new \moodle_url($FULLME);
             $leaveurl = new \moodle_url('/auth/companion/leave.php', array('backurl' => $backurl->out()));
             $leavename = s(get_string('switch_back', 'auth_companion'));
@@ -78,7 +76,7 @@ class util {
      * @return bool
      */
     public static function is_companion($user = null) {
-        $USER = gl::user();
+        global $USER;
 
         if (empty($user)) {
             $user = $USER;
@@ -92,7 +90,8 @@ class util {
      * @return bool
      */
     public static function page_is_course() {
-        $PAGE = gl::page();
+        global $PAGE;
+
         if ($PAGE->context->contextlevel != CONTEXT_COURSE) {
             return false;
         }
@@ -107,18 +106,26 @@ class util {
      *
      * @throws \moodle_exception
      * @param int $userid
+     * @param bool $iscompanionid If true the id means the companion account otherwise it means the main userid.
      * @return void
      */
-    public static function delete_companionuser(int $userid) {
-        $DB = gl::db();
-        $CFG = gl::cfg();
+    public static function delete_companionuser(int $userid, bool $iscompanionid = true) {
+        global $DB, $CFG;
         $mycfg = gl::mycfg();
 
         if (is_siteadmin($userid)) {
             throw new \moodle_exception('useradminodelete', 'error');
         }
+        if (empty($iscompanionid)) {
+            if (!$companionid = $DB->get_field('auth_companion_accounts', 'companionid', array('mainuserid' => $userid))) {
+                return;
+            }
+        } else {
+            $companionid = $userid;
+        }
+
         $params = array(
-            'id'         => $userid,
+            'id'         => $companionid,
             'auth'       => gl::AUTH,
             'deleted'    => 0,
             'mnethostid' => $CFG->mnet_localhost_id
@@ -134,10 +141,10 @@ class util {
             if (!delete_user($user)) {
                 throw new \moodle_exception('could not delete user');
             }
-            $DB->set_field('user', 'auth', 'nologin', array('id' => $userid));
+            $DB->set_field('user', 'auth', 'nologin', array('id' => $companionid));
         }
 
-        $DB->delete_records('auth_companion_accounts', array('companionid' => $userid));
+        $DB->delete_records('auth_companion_accounts', array('companionid' => $companionid));
         \core\session\manager::gc(); // Remove stale sessions.
     }
 
@@ -147,7 +154,8 @@ class util {
      * @return void
      */
     public static function clean_old_accounts() {
-        $DB = gl::db();
+        global $DB;
+
         $sql = 'SELECT c.*, u.id AS relateduserid
                 FROM {auth_companion_accounts} c
                 LEFT JOIN {user} u ON c.mainuserid = u.id AND u.deleted = 0

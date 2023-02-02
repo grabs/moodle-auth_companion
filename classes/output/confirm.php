@@ -37,7 +37,6 @@ class confirm extends base {
      * @param string $text
      */
     public function __construct($confirmform, $title, $text) {
-        $DB = gl::db();
         parent::__construct();
 
         $this->confirmform = $confirmform;
