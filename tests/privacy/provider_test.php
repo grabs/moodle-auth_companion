@@ -48,7 +48,7 @@ class provider_test extends provider_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->assertEmpty(provider::get_contexts_for_userid($user->id));
 
-        $companion = new \auth_companion\companion($user, true);
+        $companion = new \auth_companion\companion($user);
         $contextlist = provider::get_contexts_for_userid($user->id);
         // Check that we only get back one context.
         $this->assertCount(1, $contextlist);
@@ -66,7 +66,7 @@ class provider_test extends provider_testcase {
     public function test_export_user_data() {
         $user = $this->getDataGenerator()->create_user();
 
-        $companion = new \auth_companion\companion($user, true);
+        $companion = new \auth_companion\companion($user);
         $contextlist = provider::get_contexts_for_userid($user->id);
         $usercontext = \context_user::instance($user->id);
 
@@ -74,8 +74,11 @@ class provider_test extends provider_testcase {
         $this->assertFalse($writer->has_any_data());
         $approvedlist = new approved_contextlist($user, 'auth_companion', [$usercontext->id]);
         provider::export_user_data($approvedlist);
-        $data = (object) $writer->get_data([get_string('privacy:metadata:auth_companion', 'auth_companion'), $companion->get_id()]);
-        $this->assertEquals($companion->get_id(), $data->companionid);
+        $data = (object) $writer->get_data([
+            get_string('privacy:metadata:auth_companion', 'auth_companion'),
+            $companion->get_companion_id(),
+        ]);
+        $this->assertEquals($companion->get_companion_id(), $data->companionid);
     }
 
     /**
@@ -87,11 +90,11 @@ class provider_test extends provider_testcase {
         global $DB;
 
         $user1 = $this->getDataGenerator()->create_user();
-        $companion1 = new \auth_companion\companion($user1, true);
+        $companion1 = new \auth_companion\companion($user1);
         $user1context = \context_user::instance($user1->id);
 
         $user2 = $this->getDataGenerator()->create_user();
-        $companion2 = new \auth_companion\companion($user2, true);
+        $companion2 = new \auth_companion\companion($user2);
         $user2context = \context_user::instance($user2->id);
 
         // Verify there are two linked logins.
@@ -118,11 +121,11 @@ class provider_test extends provider_testcase {
     public function test_delete_data_for_user() {
         global $DB;
         $user1 = $this->getDataGenerator()->create_user();
-        $companion1 = new \auth_companion\companion($user1, true);
+        $companion1 = new \auth_companion\companion($user1);
         $user1context = \context_user::instance($user1->id);
 
         $user2 = $this->getDataGenerator()->create_user();
-        $companion2 = new \auth_companion\companion($user2, true);
+        $companion2 = new \auth_companion\companion($user2);
         $user2context = \context_user::instance($user2->id);
 
         // Verify there are two linked logins.
@@ -158,7 +161,7 @@ class provider_test extends provider_testcase {
         provider::get_users_in_context($userlist);
         $this->assertCount(0, $userlist);
 
-        $companion = new \auth_companion\companion($user, true);
+        $companion = new \auth_companion\companion($user);
 
         // The list of users for user context should return the user.
         provider::get_users_in_context($userlist);
@@ -186,8 +189,8 @@ class provider_test extends provider_testcase {
         $user2 = $this->getDataGenerator()->create_user();
         $usercontext2 = \context_user::instance($user2->id);
 
-        $companion1 = new \auth_companion\companion($user1, true);
-        $companion2 = new \auth_companion\companion($user2, true);
+        $companion1 = new \auth_companion\companion($user1);
+        $companion2 = new \auth_companion\companion($user2);
 
         // The list of users for usercontext1 should return user1.
         $userlist1 = new userlist($usercontext1, $component);

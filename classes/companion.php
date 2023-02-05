@@ -27,24 +27,24 @@ use \auth_companion\globals as gl;
  */
 class companion {
     /** @var \stdClass */
+    protected $mainuser;
+    /** @var \stdClass */
     protected $companion;
-    /** @var int */
-    protected $mainuserid;
 
     /**
      * Constructor
      *
      * @param \stdClass|null $user
-     * @param bool $forcecreate
      */
-    public function __construct($user = null, $forcecreate = false) {
+    public function __construct($user = null) {
         global $USER;
 
         if (empty($user)) {
             $user = $USER;
         }
-        $this->mainuserid = $user->id;
-        $this->companion = self::get_companion_record($user, $forcecreate);
+        $this->mainuser = $user;
+        $this->companion = $this->get_companion_record();
+        $this->set_companion_attributes();
     }
 
     /**
@@ -85,7 +85,7 @@ class companion {
         // Recreate a new empty session.
         \core\session\manager::init_empty_session(true);
 
-        $user = $DB->get_record('user', array('id' => $this->mainuserid));
+        $user = $DB->get_record('user', array('id' => $this->get_mainuser_id()));
         $user = get_complete_user_data('id', $user->id, $CFG->mnet_localhost_id);
         $user = complete_user_login($user);
         return $user;
@@ -130,96 +130,94 @@ class companion {
      *
      * @return int
      */
-    public function get_id() {
-        return $this->companion->id;
+    public function get_companion_id() {
+        global $DB;
+
+        if (!empty($this->companion->id)) {
+            return $this->companion->id;
+        }
+
+        if ($companionlink = $DB->get_record('auth_companion_accounts', array('mainuserid' => $this->get_mainuser_id()))) {
+            return (int) $companionlink->companionid;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Get the userid of the mainuser account.
+     *
+     * @return int
+     */
+    public function get_mainuser_id() {
+        return $this->mainuser->id;
     }
 
     /**
      * Get the record of the companion account
      *
-     * @param \stdClass $user The record of the user the companion is related to.
-     * @param boolean $forcecreate
      * @return \stdClass The companion account record
      */
-    protected static function get_companion_record($user, $forcecreate = false) {
+    protected function get_companion_record() {
         global $DB;
-        $mycfg = gl::mycfg();
 
         // Does a companion user exist?
-        $companionid = static::get_companion_id_from_user($user);
-        $params = array(
-            'id'      => $companionid,
-            'auth'    => gl::AUTH,
-            'deleted' => 0,
-        );
-        if ($companion = $DB->get_record('user', $params)) {
-            return $companion;
+        if ($companionid = $this->get_companion_id()) {
+            $params = array(
+                'id'      => $companionid,
+                'auth'    => gl::AUTH,
+                'deleted' => 0,
+            );
+            if ($companion = $DB->get_record('user', $params)) {
+                return $companion;
+            }
         }
 
         // The companion user does not exist yet.
         $companion = new \stdClass();
         $companion->username = \core\uuid::generate(); // Get a unique username.
         $companion->password = generate_password();
-        if ($forcecreate) {
-            $newrecord = create_user_record($companion->username, $companion->password, gl::AUTH);
-            self::set_companion_id_for_user($user, $newrecord->id);
-            foreach ($newrecord as $key => $val) {
-                $companion->{$key} = $val;
-            }
 
+        $newrecord = create_user_record($companion->username, $companion->password, gl::AUTH);
+        $this->set_companion_id($newrecord->id);
+        foreach ($newrecord as $key => $val) {
+            $companion->{$key} = $val;
         }
-        $companion->firstname = $user->firstname;
-        $companion->lastname = $user->lastname . ' ' . $mycfg->namesuffix;
-        $companion->email = $companion->username . '@companion.invalid';
-        $DB->update_record('user', $companion);
+
         return $companion;
     }
 
     /**
-     * Get a companion id from a user
+     * Set the mandatory attributes like first- and lastname to the companion account.
      *
-     * @param \stdClass $user
-     * @return int
+     * @return boot True on success
      */
-    protected static function get_companion_id_from_user($user) {
+    public function set_companion_attributes() {
         global $DB;
+        $mycfg = gl::mycfg();
 
-        if ($companionlink = $DB->get_record('auth_companion_accounts', array('mainuserid' => $user->id))) {
-            return (int) $companionlink->companionid;
-        }
-        return 0;
-    }
+        $this->companion->firstname = $this->mainuser->firstname;
+        $this->companion->lastname = $this->mainuser->lastname . ' ' . $mycfg->namesuffix;
+        $this->companion->email = $this->companion->username . '@companion.invalid';
 
-    /**
-     * Get the user id of a companion account
-     *
-     * @param int $companionid
-     * @return int
-     */
-    protected static function get_user_id_from_companion($companionid) {
-        global $DB;
-
-        if ($companionlink = $DB->get_record('auth_companion_accounts', array('companionid' => $companionid))) {
-            return (int) $companionlink->mainuserid;
-        }
-        return 0;
+        return $DB->update_record('user', $this->companion);
     }
 
     /**
      * Set the companion id for a user
      *
-     * @param \stdClass $user
      * @param int $companionid
      * @return bool
      */
-    protected static function set_companion_id_for_user($user, $companionid) {
+    protected function set_companion_id($companionid) {
         global $DB;
 
-        if ($companionlink = $DB->get_record('auth_companion_accounts', array('mainuserid' => $user->id))) {
-            return $DB->set_field('auth_companion_accounts', 'companionid', $companionid, array('mainuserid' => $user->id));
+        $mainuserid = $this->get_mainuser_id();
+        if ($companionlink = $DB->get_record('auth_companion_accounts', array('mainuserid' => $mainuserid))) {
+            return $DB->set_field('auth_companion_accounts', 'companionid', $companionid, array('mainuserid' => $mainuserid));
         }
         $companionlink = new \stdClass();
-        $companionlink->mainuserid = $user->id;
+        $companionlink->mainuserid = $mainuserid;
         $companionlink->companionid = $companionid;
         $companionlink->timecreated = time();
         return (bool) $DB->insert_record('auth_companion_accounts', $companionlink);
@@ -236,11 +234,27 @@ class companion {
         global $DB;
 
         // First we get the id of the related main user.
-        $mainuserid = self::get_user_id_from_companion($companionuserid);
+        $mainuserid = self::get_mainuser_id_from_companion($companionuserid);
 
         if (empty($mainuser = $DB->get_record('user', array('id' => $mainuserid), '*', MUST_EXIST))) {
             throw new \moodle_exception('wrong userid');
         }
         return new static($mainuser);
     }
+
+    /**
+     * Get the user id of a companion account
+     *
+     * @param int $companionid
+     * @return int
+     */
+    protected static function get_mainuser_id_from_companion($companionid) {
+        global $DB;
+
+        if ($companionlink = $DB->get_record('auth_companion_accounts', array('companionid' => $companionid))) {
+            return (int) $companionlink->mainuserid;
+        }
+        return 0;
+    }
+
 }

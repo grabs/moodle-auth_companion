@@ -1,5 +1,9 @@
 ## Release notes
 
+### Version v4.3 (2023020500)
+* reduce complexity
+* make sure the companion attributes are set correct.
+
 ### Version v4.2 (2023020200)
 * #1 remove abstraction class with moodle globals
 * #2 optimized privacy api and added privacy test

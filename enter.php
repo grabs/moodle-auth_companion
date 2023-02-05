@@ -69,7 +69,7 @@ if ($data = $confirmform->get_data()) {
         throw new \moodle_exception('wrong_or_missing_role', 'auth_companion');
     }
 
-    $companion = new \auth_companion\companion($USER, true);
+    $companion = new \auth_companion\companion($USER);
     $user = $companion->login();
     // Now you are logged in as companion.
 

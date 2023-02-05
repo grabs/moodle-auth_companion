@@ -166,6 +166,7 @@ class util {
         foreach ($recordset as $record) {
             // There is no real user related to this record.
             try {
+                mtrace('... Remove orphaned companion user (' . $record->companionid . ')');
                 static::delete_companionuser($record->companionid);
             } catch (\moodle_exception $e) {
                 $DB->delete_records('auth_companion_accounts', array('companionid' => $record->companionid));

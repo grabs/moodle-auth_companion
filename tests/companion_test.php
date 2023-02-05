@@ -43,7 +43,7 @@ class companion_test extends \advanced_testcase {
         $countuserbefore = $DB->count_records('user', array('deleted' => 0, 'auth' => gl::AUTH));
         $countcompanionbefore = $DB->count_records('auth_companion_accounts', null);
 
-        $companion = new \auth_companion\companion($USER, true);
+        $companion = new \auth_companion\companion($USER);
 
         // Check the count of users and companions after.
         $countuserafter = $DB->count_records('user', array('deleted' => 0, 'auth' => gl::AUTH));
@@ -54,12 +54,12 @@ class companion_test extends \advanced_testcase {
         $this->assertTrue($countcompanionbefore < $countcompanionafter);
 
         // We should be able to get an id.
-        $companionid = $companion->get_id();
+        $companionid = $companion->get_companion_id();
         $this->assertNotEmpty($companionid);
 
         // We should be able to get a companion instance by using the companion id.
         $companionagain = \auth_companion\companion::get_instance_by_companion($companionid);
-        $this->assertEquals($companionid, $companionagain->get_id());
+        $this->assertEquals($companionid, $companionagain->get_companion_id());
     }
 
     /**
@@ -74,14 +74,14 @@ class companion_test extends \advanced_testcase {
         $this->resetAfterTest();
         $this->setAdminUser();
 
-        $companion = new \auth_companion\companion($USER, true);
-        $companionid = $companion->get_id();
+        $companion = new \auth_companion\companion($USER);
+        $companionid = $companion->get_companion_id();
 
         // Check the count of users and companions before deleting.
         $countuserbefore = $DB->count_records('user', array('deleted' => 0, 'auth' => gl::AUTH));
         $countcompanionbefore = $DB->count_records('auth_companion_accounts', null);
 
-        \auth_companion\util::delete_companionuser($companion->get_id());
+        \auth_companion\util::delete_companionuser($companion->get_companion_id());
 
         // Check the count of users and companions after deleting.
         $countuserafter = $DB->count_records('user', array('deleted' => 0, 'auth' => gl::AUTH));
