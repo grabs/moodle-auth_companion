@@ -1,5 +1,8 @@
 ## Release notes
 
+### Version v4.2.1
+* Increase version (I forgot)
+
 ### Version v4.2
 * Add settings option to force date deletion.
 * Add settings option to activate email overriding.
