@@ -70,6 +70,9 @@ if ($data = $confirmform->get_data()) {
     }
 
     $companion = new \auth_companion\companion($USER);
+    if (!empty($data->emailoverride)) {
+        $companion->override_email();
+    }
     $user = $companion->login();
     // Now you are logged in as companion.
 

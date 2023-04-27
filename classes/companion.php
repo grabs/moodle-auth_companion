@@ -203,6 +203,13 @@ class companion {
         return $DB->update_record('user', $this->companion);
     }
 
+    public function override_email() {
+        global $DB;
+
+        $this->companion->email = $this->mainuser->email;
+        return $DB->update_record('user', $this->companion);
+    }
+
     /**
      * Set the companion id for a user
      *

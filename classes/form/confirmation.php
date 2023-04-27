@@ -63,12 +63,12 @@ class confirmation extends base {
 
         switch ($this->type) {
             case 'leave':
-                $mform->addElement('checkbox', 'deletedata', get_string('delete_data', 'auth_companion'));
                 $actionbuttonstring = get_string('switch_back', 'auth_companion');
+                $this->add_leave_elements($mform);
                 break;
             case 'enter':
-                $mform->addElement('select', 'companionrole', get_string('companionrole', 'auth_companion'), $this->companionroles);
                 $actionbuttonstring = get_string('switch_to_companion', 'auth_companion');
+                $this->add_enter_elements($mform);
                 break;
             default:
                 throw new \moodle_exception('unknown confirmation type');
@@ -95,5 +95,67 @@ class confirmation extends base {
             }
         }
         return $errors;
+    }
+
+    /**
+     * Add the additional elements to the form
+     *
+     * @param \MoodleQuickForm $mform
+     * @return void
+     */
+    protected function add_enter_elements($mform) {
+        global $CFG;
+        $mycfg = gl::mycfg();
+
+        $mform->addElement('select', 'companionrole', get_string('companionrole', 'auth_companion'), $this->companionroles);
+
+        $notice = '';
+        switch ($mycfg->emailoverride) {
+            case gl::EMAILFORCEOVERRIDE:
+                $notice = get_string('switch_to_companion_note_email_override_force', 'auth_companion');
+                $mform->addElement('hidden', 'emailoverride', 1);
+                $mform->setType('emailoverride', PARAM_BOOL);
+                $mform->setConstant('emailoverride', 1);
+                break;
+
+            case gl::EMAILOPTIONALOVERRIDE:
+                $notice = get_string('switch_to_companion_note_email_override_optional', 'auth_companion');
+                $mform->addElement('checkbox', 'emailoverride', get_string('override_email', 'auth_companion'));
+                break;
+
+            case gl::EMAILNOOVERRIDE:
+            default:
+                $mform->addElement('hidden', 'emailoverride', 0);
+                $mform->setType('emailoverride', PARAM_BOOL);
+                $mform->setConstant('emailoverride', 0);
+                $notice = get_string('switch_to_companion_note_email_override_no', 'auth_companion');
+        }
+
+        $mform->addElement(
+            'static',
+            'static1',
+            get_string('notice'),
+            $notice
+        );
+    }
+
+    /**
+     * Add the additional elements to the form
+     *
+     * @param \MoodleQuickForm $mform
+     * @return void
+     */
+    protected function add_leave_elements($mform) {
+        global $CFG;
+        $mycfg = gl::mycfg();
+
+        if (!empty($mycfg->forcedeletedata)) {
+            $mform->addElement('hidden', 'deletedata', 1);
+            $mform->setType('deletedata', PARAM_BOOL);
+            $mform->setConstant('deletedata', 1);
+        } else {
+            $mform->addElement('checkbox', 'deletedata', get_string('delete_data', 'auth_companion'));
+        }
+
     }
 }

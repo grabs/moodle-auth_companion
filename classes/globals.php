@@ -25,8 +25,16 @@ namespace auth_companion;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class globals {
-    /** @var this auth type */
+    /** This auth type */
     public const AUTH = 'companion';
+
+    /** Override constant - Do not override the email address */
+    public const EMAILNOOVERRIDE       = 'emailnooverride';
+    /** Override constant - Force override the email address */
+    public const EMAILFORCEOVERRIDE    = 'emailforceoverride';
+    /** Override constant - Optional override the email address */
+    public const EMAILOPTIONALOVERRIDE = 'emailoptionaloverride';
+
 
     /**
      * Returns the plugin configuration.
@@ -35,9 +43,13 @@ class globals {
      */
     public static function mycfg() {
         static $mycfg;
+        global $CFG;
 
         if (empty($mycfg)) {
             $mycfg = get_config('auth_companion');
+            if (!empty($CFG->authloginviaemail)) {
+                $mycfg->emailoverride = static::EMAILNOOVERRIDE;
+            }
         }
 
         return $mycfg;

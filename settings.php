@@ -30,8 +30,8 @@ if ($ADMIN->fulltree) {
 
     $settings->add(
         new admin_setting_heading(
-            'auth_companion/pluginname',
-            '',
+            'auth_companion/hdr1',
+            get_string('general'),
             new lang_string('auth_companiondescription', 'auth_companion')
         )
     );
@@ -49,6 +49,36 @@ if ($ADMIN->fulltree) {
             get_string('setting_forcelogin', 'auth_companion'),
             get_string('setting_forcelogin_help', 'auth_companion'),
             true
+        )
+    );
+    $settings->add(
+        new admin_setting_configcheckbox(
+            'auth_companion/forcedeletedata',
+            get_string('setting_forcedeletedata', 'auth_companion'),
+            get_string('setting_forcedeletedata_help', 'auth_companion'),
+            true
+        )
+    );
+
+    // Prevent email overriding if $CFG->authloginviaemail is active.
+    if (!empty($CFG->authloginviaemail)) {
+        $options = array(
+            gl::EMAILNOOVERRIDE => get_string('setting_email_option_no_override', 'auth_companion'),
+        );
+    } else {
+        $options = array(
+            gl::EMAILNOOVERRIDE       => get_string('setting_email_option_no_override', 'auth_companion'),
+            gl::EMAILFORCEOVERRIDE    => get_string('setting_email_option_force_override', 'auth_companion'),
+            gl::EMAILOPTIONALOVERRIDE => get_string('setting_email_option_optional', 'auth_companion'),
+        );
+    }
+    $settings->add(
+        new admin_setting_configselect(
+            'auth_companion/emailoverride',
+            get_string('setting_email_options', 'auth_companion'),
+            get_string('setting_email_option_help', 'auth_companion'),
+            gl::EMAILNOOVERRIDE,
+            $options
         )
     );
 
