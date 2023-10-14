@@ -70,6 +70,42 @@ class util {
     }
 
     /**
+     * Create a rendered action element for user navigation (Top navigation left from user avatar).
+     *
+     * @return string The html
+     */
+    public static function create_nav_action() {
+        global $OUTPUT, $PAGE, $FULLME;
+
+        if (!static::page_is_course()) {
+            return '';
+        }
+
+        if (static::is_companion()) {
+            $backurl = new \moodle_url($FULLME);
+            $url = new \moodle_url('/auth/companion/leave.php', array('backurl' => $backurl->out()));
+            $text = get_string('switch_back', 'auth_companion');
+            $pixicon = 'companionon';
+        } else {
+            if (!has_capability('auth/companion:allowcompanion', $PAGE->context)) {
+                return '';
+            }
+
+            $url = new \moodle_url('/auth/companion/enter.php', array('courseid' => $PAGE->course->id));
+            $text = get_string('switch_to_companion', 'auth_companion');
+            $pixicon = 'companionoff';
+        }
+
+        $icon = new \pix_icon($pixicon, $text, 'auth_companion');
+
+        $content = new \stdClass();
+        $content->text = $text;
+        $content->url = $url;
+        $content->icon = $OUTPUT->render($icon);
+        return $OUTPUT->render_from_template('auth_companion/navbar_action', $content);
+    }
+
+    /**
      * Checks whether or not the given user is a companion account.
      *
      * @param \stdClass|null $user

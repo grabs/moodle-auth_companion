@@ -26,6 +26,17 @@
 use \auth_companion\globals as gl;
 
 /**
+ * Allow plugins to provide some content to be rendered in the navbar.
+ * The plugin must define a PLUGIN_render_navbar_output function that returns
+ * the HTML they wish to add to the navbar.
+ *
+ * @return string HTML for the navbar
+ */
+function auth_companion_render_navbar_output() {
+    return \auth_companion\util::create_nav_action();
+}
+
+/**
  * Modify the user navigation.
  *
  * @param navigation_node $navigation
@@ -35,4 +46,19 @@ function auth_companion_extend_navigation_user_settings(navigation_node $navigat
         return;
     }
     \auth_companion\util::set_user_menu();
+}
+
+/**
+ * Get icon mapping for FontAwesome.
+ *
+ * @return array
+ */
+function auth_companion_get_fontawesome_icon_map() {
+    // We build a map of some icons we use in the top usermenu.
+    $iconmap = [
+        'auth_companion:companionon'  => 'fa-user-secret text-success',
+        'auth_companion:companionoff' => 'fa-user-secret',
+    ];
+
+    return $iconmap;
 }
