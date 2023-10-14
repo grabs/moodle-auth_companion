@@ -35,7 +35,6 @@ class globals {
     /** Override constant - Optional override the email address */
     public const EMAILOPTIONALOVERRIDE = 'emailoptionaloverride';
 
-
     /**
      * Returns the plugin configuration.
      *
@@ -54,5 +53,4 @@ class globals {
 
         return $mycfg;
     }
-
 }

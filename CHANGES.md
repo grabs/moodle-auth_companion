@@ -1,5 +1,9 @@
 ## Release notes
 
+### Version v4.3
+* Add icon for quick access to the usermenu on top of the page.
+* Apply new coding style rules for arrays.
+
 ### Version v4.2.1
 * Increase version (I forgot)
 

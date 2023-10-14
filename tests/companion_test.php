@@ -15,7 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace auth_companion;
-use \auth_companion\globals as gl;
+
+use auth_companion\globals as gl;
 
 /**
  * Unit tests for companion account features.
@@ -26,9 +27,8 @@ use \auth_companion\globals as gl;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class companion_test extends \advanced_testcase {
-
     /**
-     * Test create a companion account
+     * Test create a companion account.
      *
      * @covers \auth_companion\companion::__construct
      * @return void
@@ -40,13 +40,13 @@ class companion_test extends \advanced_testcase {
         $this->setAdminUser();
 
         // Check the count of users and companions before.
-        $countuserbefore = $DB->count_records('user', array('deleted' => 0, 'auth' => gl::AUTH));
+        $countuserbefore      = $DB->count_records('user', ['deleted' => 0, 'auth' => gl::AUTH]);
         $countcompanionbefore = $DB->count_records('auth_companion_accounts', null);
 
         $companion = new \auth_companion\companion($USER);
 
         // Check the count of users and companions after.
-        $countuserafter = $DB->count_records('user', array('deleted' => 0, 'auth' => gl::AUTH));
+        $countuserafter      = $DB->count_records('user', ['deleted' => 0, 'auth' => gl::AUTH]);
         $countcompanionafter = $DB->count_records('auth_companion_accounts', null);
 
         // Now there should be more counts after than before.
@@ -63,7 +63,7 @@ class companion_test extends \advanced_testcase {
     }
 
     /**
-     * Test delete a companion account
+     * Test delete a companion account.
      *
      * @covers \auth_companion\util::delete_companionuser
      * @return void
@@ -74,17 +74,17 @@ class companion_test extends \advanced_testcase {
         $this->resetAfterTest();
         $this->setAdminUser();
 
-        $companion = new \auth_companion\companion($USER);
+        $companion   = new \auth_companion\companion($USER);
         $companionid = $companion->get_companion_id();
 
         // Check the count of users and companions before deleting.
-        $countuserbefore = $DB->count_records('user', array('deleted' => 0, 'auth' => gl::AUTH));
+        $countuserbefore      = $DB->count_records('user', ['deleted' => 0, 'auth' => gl::AUTH]);
         $countcompanionbefore = $DB->count_records('auth_companion_accounts', null);
 
         \auth_companion\util::delete_companionuser($companion->get_companion_id());
 
         // Check the count of users and companions after deleting.
-        $countuserafter = $DB->count_records('user', array('deleted' => 0, 'auth' => gl::AUTH));
+        $countuserafter      = $DB->count_records('user', ['deleted' => 0, 'auth' => gl::AUTH]);
         $countcompanionafter = $DB->count_records('auth_companion_accounts', null);
 
         // We should now have fewer users and companions.

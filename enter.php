@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Switch to the companion account
+ * Switch to the companion account.
  *
  * @package    auth_companion
  * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
@@ -23,25 +23,23 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use \auth_companion\globals as gl;
-
-require_once(dirname(dirname(__DIR__)).'/config.php');
+require_once(dirname(__DIR__, 2) . '/config.php');
 
 require_login();
 
 $courseid = required_param('courseid', PARAM_INT);
 
-if (!$course = $DB->get_record('course', array('id' => $courseid))) {
+if (!$course = $DB->get_record('course', ['id' => $courseid])) {
     throw new \moodle_exception('course not found');
 }
 
-$context = \context_system::instance();
+$context       = \context_system::instance();
 $coursecontext = \context_course::instance($course->id);
 require_capability('auth/companion:allowcompanion', $coursecontext);
 
 $pagetitle = get_string('pluginname', 'auth_companion');
-$title = get_string('switch_to_companion', 'auth_companion');
-$text = get_string('switch_to_companion_text', 'auth_companion');
+$title     = get_string('switch_to_companion', 'auth_companion');
+$text      = get_string('switch_to_companion_text', 'auth_companion');
 
 $myurl = new \moodle_url($FULLME);
 $myurl->remove_all_params();
@@ -54,15 +52,15 @@ $PAGE->set_pagelayout('frontpage');
 $PAGE->set_heading($pagetitle);
 $PAGE->set_title($pagetitle);
 
-$roles = \auth_companion\util::get_roles_options('auth/companion:useascompanion', $coursecontext);
-$customdata = array(
-    'courseid' => $course->id,
-    'type' => 'enter',
+$roles      = \auth_companion\util::get_roles_options('auth/companion:useascompanion', $coursecontext);
+$customdata = [
+    'courseid'       => $course->id,
+    'type'           => 'enter',
     'companionroles' => $roles,
-);
+];
 $confirmform = new \auth_companion\form\confirmation(null, $customdata);
 if ($confirmform->is_cancelled()) {
-    redirect(new \moodle_url('/course/view.php', array('id' => $course->id)));
+    redirect(new \moodle_url('/course/view.php', ['id' => $course->id]));
 }
 if ($data = $confirmform->get_data()) {
     if (empty($data->companionrole) || !in_array($data->companionrole, array_keys($roles))) {
@@ -76,7 +74,7 @@ if ($data = $confirmform->get_data()) {
     $user = $companion->login();
     // Now you are logged in as companion.
 
-    $redirecturl = new \moodle_url('/course/view.php', array('id' => $course->id));
+    $redirecturl = new \moodle_url('/course/view.php', ['id' => $course->id]);
     $companion->enrol($course, $data->companionrole);
     $notificationtext = get_string('info_using_companion', 'auth_companion', fullname($user));
     \core\notification::add($notificationtext, \core\notification::SUCCESS);

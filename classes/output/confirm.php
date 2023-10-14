@@ -15,7 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace auth_companion\output;
-use \auth_companion\globals as gl;
 
 /**
  * Renderable and templatable component for delete box.
@@ -30,28 +29,29 @@ class confirm extends base {
     private $confirmform;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param \auth_companion\form\base $confirmform
-     * @param string $title
-     * @param string $text
+     * @param string                    $title
+     * @param string                    $text
      */
     public function __construct($confirmform, $title, $text) {
         parent::__construct();
 
-        $this->confirmform = $confirmform;
+        $this->confirmform   = $confirmform;
         $this->data['title'] = $title;
-        $this->data['text'] = $text;
+        $this->data['text']  = $text;
     }
 
     /**
-     * Data for usage in mustache
+     * Data for usage in mustache.
      *
-     * @param \renderer_base $output
+     * @param  \renderer_base $output
      * @return array
      */
     public function export_for_template(\renderer_base $output) {
         $this->data['formcontent'] = $this->confirmform->export_for_template($output);
+
         return $this->data;
     }
 }

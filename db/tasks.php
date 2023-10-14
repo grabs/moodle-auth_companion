@@ -15,24 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Task definition
+ * Task definition.
  *
  * @package   auth_companion
  * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
  * @author    Andreas Grabs <moodle@grabs-edv.de>
  * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die;
 
-defined('MOODLE_INTERNAL') || die();
-
-$tasks = array(
-    array(
+$tasks = [
+    [
         'classname' => 'auth_companion\task\clean',
-        'blocking' => 0,
-        'minute' => '0',
-        'hour' => 'R',
-        'day' => '*',
-        'month' => '*',
+        'blocking'  => 0,
+        'minute'    => '0',
+        'hour'      => 'R',
+        'day'       => '*',
+        'month'     => '*',
         'dayofweek' => '*',
-    ),
-);
+    ],
+];

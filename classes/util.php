@@ -15,7 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace auth_companion;
-use \auth_companion\globals as gl;
+
+use auth_companion\globals as gl;
 
 /**
  * Provide a set of static methods.
@@ -47,10 +48,11 @@ class util {
 
         // The user is a companion.
         if (static::is_companion()) {
-            $backurl = new \moodle_url($FULLME);
-            $leaveurl = new \moodle_url('/auth/companion/leave.php', array('backurl' => $backurl->out()));
+            $backurl   = new \moodle_url($FULLME);
+            $leaveurl  = new \moodle_url('/auth/companion/leave.php', ['backurl' => $backurl->out()]);
             $leavename = s(get_string('switch_back', 'auth_companion'));
             $CFG->customusermenuitems .= "\n###\n$leavename|" . $leaveurl->out();
+
             return;
         }
 
@@ -63,10 +65,9 @@ class util {
             return;
         }
 
-        $enterurl = new \moodle_url('/auth/companion/enter.php', array('courseid' => $PAGE->course->id));
+        $enterurl  = new \moodle_url('/auth/companion/enter.php', ['courseid' => $PAGE->course->id]);
         $entername = s(get_string('switch_to_companion', 'auth_companion'));
         $CFG->customusermenuitems .= "\n###\n$entername|" . $enterurl->out();
-        return;
     }
 
     /**
@@ -83,32 +84,33 @@ class util {
 
         if (static::is_companion()) {
             $backurl = new \moodle_url($FULLME);
-            $url = new \moodle_url('/auth/companion/leave.php', array('backurl' => $backurl->out()));
-            $text = get_string('switch_back', 'auth_companion');
+            $url     = new \moodle_url('/auth/companion/leave.php', ['backurl' => $backurl->out()]);
+            $text    = get_string('switch_back', 'auth_companion');
             $pixicon = 'companionon';
         } else {
             if (!has_capability('auth/companion:allowcompanion', $PAGE->context)) {
                 return '';
             }
 
-            $url = new \moodle_url('/auth/companion/enter.php', array('courseid' => $PAGE->course->id));
-            $text = get_string('switch_to_companion', 'auth_companion');
+            $url     = new \moodle_url('/auth/companion/enter.php', ['courseid' => $PAGE->course->id]);
+            $text    = get_string('switch_to_companion', 'auth_companion');
             $pixicon = 'companionoff';
         }
 
         $icon = new \pix_icon($pixicon, $text, 'auth_companion');
 
-        $content = new \stdClass();
+        $content       = new \stdClass();
         $content->text = $text;
-        $content->url = $url;
+        $content->url  = $url;
         $content->icon = $OUTPUT->render($icon);
+
         return $OUTPUT->render_from_template('auth_companion/navbar_action', $content);
     }
 
     /**
      * Checks whether or not the given user is a companion account.
      *
-     * @param \stdClass|null $user
+     * @param  \stdClass|null $user
      * @return bool
      */
     public static function is_companion($user = null) {
@@ -117,6 +119,7 @@ class util {
         if (empty($user)) {
             $user = $USER;
         }
+
         return $USER->auth == gl::AUTH;
     }
 
@@ -134,15 +137,16 @@ class util {
         if ($PAGE->course->id == SITEID) {
             return false;
         }
+
         return true;
     }
 
     /**
-     * Delete the companion account
+     * Delete the companion account.
      *
+     * @param  int               $userid
+     * @param  bool              $iscompanionid if true the id means the companion account otherwise it means the main userid
      * @throws \moodle_exception
-     * @param int $userid
-     * @param bool $iscompanionid If true the id means the companion account otherwise it means the main userid.
      * @return void
      */
     public static function delete_companionuser(int $userid, bool $iscompanionid = true) {
@@ -153,34 +157,34 @@ class util {
             throw new \moodle_exception('useradminodelete', 'error');
         }
         if (empty($iscompanionid)) {
-            if (!$companionid = $DB->get_field('auth_companion_accounts', 'companionid', array('mainuserid' => $userid))) {
+            if (!$companionid = $DB->get_field('auth_companion_accounts', 'companionid', ['mainuserid' => $userid])) {
                 return;
             }
         } else {
             $companionid = $userid;
         }
 
-        $params = array(
+        $params = [
             'id'         => $companionid,
             'auth'       => gl::AUTH,
             'deleted'    => 0,
-            'mnethostid' => $CFG->mnet_localhost_id
-        );
+            'mnethostid' => $CFG->mnet_localhost_id,
+        ];
         if ($user = $DB->get_record('user', $params, '*', IGNORE_MISSING)) {
             // First we anonymize the username and email.
-            $anonymousname = $mycfg->anonymousname ?? 'anonymous';
+            $anonymousname   = $mycfg->anonymousname ?? 'anonymous';
             $user->firstname = $anonymousname;
-            $user->lastname = $anonymousname;
-            $user->email = $anonymousname . '.' . $anonymousname . '@auth-companion.invalid';
+            $user->lastname  = $anonymousname;
+            $user->email     = $anonymousname . '.' . $anonymousname . '@auth-companion.invalid';
             $DB->update_record('user', $user);
 
             if (!delete_user($user)) {
                 throw new \moodle_exception('could not delete user');
             }
-            $DB->set_field('user', 'auth', 'nologin', array('id' => $companionid));
+            $DB->set_field('user', 'auth', 'nologin', ['id' => $companionid]);
         }
 
-        $DB->delete_records('auth_companion_accounts', array('companionid' => $companionid));
+        $DB->delete_records('auth_companion_accounts', ['companionid' => $companionid]);
         \core\session\manager::gc(); // Remove stale sessions.
     }
 
@@ -205,25 +209,24 @@ class util {
                 mtrace('... Remove orphaned companion user (' . $record->companionid . ')');
                 static::delete_companionuser($record->companionid);
             } catch (\moodle_exception $e) {
-                $DB->delete_records('auth_companion_accounts', array('companionid' => $record->companionid));
+                $DB->delete_records('auth_companion_accounts', ['companionid' => $record->companionid]);
             }
         }
         $recordset->close();
-
     }
 
     /**
      * Get role options for usage in a select form element.
      *
-     * @param string $capability
-     * @param \context $context
-     * @return array The roles array with localized names.
+     * @param  string   $capability
+     * @param  \context $context
+     * @return array    the roles array with localized names
      */
     public static function get_roles_options(string $capability, \context $context) {
         if (!$roles = get_roles_with_capability($capability, CAP_ALLOW, $context)) {
-            return array();
+            return [];
         }
-        $return = array();
+        $return = [];
         foreach ($roles as $role) {
             $return[$role->id] = $role->shortname;
         }

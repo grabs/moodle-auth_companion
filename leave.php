@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Switch back to the main acount
+ * Switch back to the main acount.
  *
  * @package    auth_companion
  * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
@@ -23,9 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use \auth_companion\globals as gl;
+use auth_companion\globals as gl;
 
-require_once(dirname(dirname(__DIR__)).'/config.php');
+require_once(dirname(__DIR__, 2) . '/config.php');
 
 require_login();
 
@@ -36,9 +36,9 @@ if (empty($backurl)) {
     $backurl = new \moodle_url($backurl);
 }
 
-$pagetitle = get_string('pluginname', 'auth_companion');
-$title = get_string('switch_back', 'auth_companion');
-$text = get_string('switch_back_text', 'auth_companion');
+$pagetitle       = get_string('pluginname', 'auth_companion');
+$title           = get_string('switch_back', 'auth_companion');
+$text            = get_string('switch_back_text', 'auth_companion');
 $companionuserid = $USER->id;
 
 $context = \context_system::instance();
@@ -53,10 +53,10 @@ $PAGE->set_pagelayout('frontpage');
 $PAGE->set_heading($pagetitle);
 $PAGE->set_title($pagetitle);
 
-$customdata = array(
+$customdata = [
     'backurl' => $backurl,
-    'type' => 'leave',
-);
+    'type'    => 'leave',
+];
 $confirmform = new \auth_companion\form\confirmation(null, $customdata);
 if ($confirmform->is_cancelled()) {
     redirect($backurl);

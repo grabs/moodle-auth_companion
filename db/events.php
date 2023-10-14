@@ -21,13 +21,11 @@
  * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die;
 
-defined('MOODLE_INTERNAL') || die();
-
-$observers = array(
-
-    array(
+$observers = [
+    [
         'eventname' => '\core\event\user_deleted',
         'callback'  => '\auth_companion\observer::user_deleted',
-    ),
-);
+    ],
+];

@@ -17,10 +17,10 @@
 namespace auth_companion\privacy;
 
 use core_privacy\local\request\approved_contextlist;
+use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 use core_privacy\tests\provider_testcase;
-use core_privacy\local\request\approved_userlist;
 
 /**
  * Test for the auth_companion privacy provider.
@@ -48,7 +48,7 @@ class provider_test extends provider_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->assertEmpty(provider::get_contexts_for_userid($user->id));
 
-        $companion = new \auth_companion\companion($user);
+        $companion   = new \auth_companion\companion($user);
         $contextlist = provider::get_contexts_for_userid($user->id);
         // Check that we only get back one context.
         $this->assertCount(1, $contextlist);
@@ -66,7 +66,7 @@ class provider_test extends provider_testcase {
     public function test_export_user_data() {
         $user = $this->getDataGenerator()->create_user();
 
-        $companion = new \auth_companion\companion($user);
+        $companion   = new \auth_companion\companion($user);
         $contextlist = provider::get_contexts_for_userid($user->id);
         $usercontext = \context_user::instance($user->id);
 
@@ -89,12 +89,12 @@ class provider_test extends provider_testcase {
     public function test_delete_data_for_all_users_in_context() {
         global $DB;
 
-        $user1 = $this->getDataGenerator()->create_user();
-        $companion1 = new \auth_companion\companion($user1);
+        $user1        = $this->getDataGenerator()->create_user();
+        $companion1   = new \auth_companion\companion($user1);
         $user1context = \context_user::instance($user1->id);
 
-        $user2 = $this->getDataGenerator()->create_user();
-        $companion2 = new \auth_companion\companion($user2);
+        $user2        = $this->getDataGenerator()->create_user();
+        $companion2   = new \auth_companion\companion($user2);
         $user2context = \context_user::instance($user2->id);
 
         // Verify there are two linked logins.
@@ -120,12 +120,12 @@ class provider_test extends provider_testcase {
      */
     public function test_delete_data_for_user() {
         global $DB;
-        $user1 = $this->getDataGenerator()->create_user();
-        $companion1 = new \auth_companion\companion($user1);
+        $user1        = $this->getDataGenerator()->create_user();
+        $companion1   = new \auth_companion\companion($user1);
         $user1context = \context_user::instance($user1->id);
 
-        $user2 = $this->getDataGenerator()->create_user();
-        $companion2 = new \auth_companion\companion($user2);
+        $user2        = $this->getDataGenerator()->create_user();
+        $companion2   = new \auth_companion\companion($user2);
         $user2context = \context_user::instance($user2->id);
 
         // Verify there are two linked logins.
@@ -141,7 +141,7 @@ class provider_test extends provider_testcase {
         $this->assertCount(0, $ltiaccounts);
 
         // Verify there is only one linked login now.
-        $ltiaccounts = $DB->get_records('auth_companion_accounts', array());
+        $ltiaccounts = $DB->get_records('auth_companion_accounts', []);
         $this->assertCount(1, $ltiaccounts);
     }
 
@@ -151,10 +151,10 @@ class provider_test extends provider_testcase {
      * @covers ::get_users_in_context
      */
     public function test_get_users_in_context() {
-        $user = $this->getDataGenerator()->create_user();
+        $user        = $this->getDataGenerator()->create_user();
         $contextlist = provider::get_contexts_for_userid($user->id);
         $usercontext = \context_user::instance($user->id);
-        $component = 'auth_companion';
+        $component   = 'auth_companion';
 
         // The list of users should not return anything yet (no linked login yet).
         $userlist = new userlist($usercontext, $component);
@@ -167,12 +167,12 @@ class provider_test extends provider_testcase {
         provider::get_users_in_context($userlist);
         $this->assertCount(1, $userlist);
         $expected = [$user->id];
-        $actual = $userlist->get_userids();
+        $actual   = $userlist->get_userids();
         $this->assertEquals($expected, $actual);
 
         // The list of users for system context should not return any users.
         $systemcontext = \context_system::instance();
-        $userlist = new userlist($systemcontext, $component);
+        $userlist      = new userlist($systemcontext, $component);
         provider::get_users_in_context($userlist);
         $this->assertCount(0, $userlist);
     }
@@ -183,10 +183,10 @@ class provider_test extends provider_testcase {
      * @covers ::delete_data_for_users
      */
     public function test_delete_data_for_users() {
-        $component = 'auth_companion';
-        $user1 = $this->getDataGenerator()->create_user();
+        $component    = 'auth_companion';
+        $user1        = $this->getDataGenerator()->create_user();
         $usercontext1 = \context_user::instance($user1->id);
-        $user2 = $this->getDataGenerator()->create_user();
+        $user2        = $this->getDataGenerator()->create_user();
         $usercontext2 = \context_user::instance($user2->id);
 
         $companion1 = new \auth_companion\companion($user1);
@@ -197,7 +197,7 @@ class provider_test extends provider_testcase {
         provider::get_users_in_context($userlist1);
         $this->assertCount(1, $userlist1);
         $expected = [$user1->id];
-        $actual = $userlist1->get_userids();
+        $actual   = $userlist1->get_userids();
         $this->assertEquals($expected, $actual);
 
         // The list of users for usercontext2 should return user2.
@@ -205,7 +205,7 @@ class provider_test extends provider_testcase {
         provider::get_users_in_context($userlist2);
         $this->assertCount(1, $userlist2);
         $expected = [$user2->id];
-        $actual = $userlist2->get_userids();
+        $actual   = $userlist2->get_userids();
         $this->assertEquals($expected, $actual);
 
         // Add userlist1 to the approved user list.

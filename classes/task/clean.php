@@ -15,7 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace auth_companion\task;
-use \auth_companion\globals as gl;
+
+use auth_companion\globals as gl;
 
 /**
  * Scheduled task for removing unrelated companion accounts.
@@ -26,7 +27,6 @@ use \auth_companion\globals as gl;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class clean extends \core\task\scheduled_task {
-
     /**
      * Get a descriptive name for this task (shown to admins).
      *
@@ -45,5 +45,4 @@ class clean extends \core\task\scheduled_task {
         }
         \auth_companion\util::clean_old_accounts();
     }
-
 }

@@ -15,19 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin settings page
+ * Plugin settings page.
  *
  * @package    auth_companion
  * @copyright  2022 Grabs-EDV (https://www.grabs-edv.com)
  * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die;
-use \auth_companion\globals as gl;
+use auth_companion\globals as gl;
 
 if ($ADMIN->fulltree) {
-
     $settings->add(
         new admin_setting_heading(
             'auth_companion/hdr1',
@@ -62,15 +60,15 @@ if ($ADMIN->fulltree) {
 
     // Prevent email overriding if $CFG->authloginviaemail is active.
     if (!empty($CFG->authloginviaemail)) {
-        $options = array(
+        $options = [
             gl::EMAILNOOVERRIDE => get_string('setting_email_option_no_override', 'auth_companion'),
-        );
+        ];
     } else {
-        $options = array(
+        $options = [
             gl::EMAILNOOVERRIDE       => get_string('setting_email_option_no_override', 'auth_companion'),
             gl::EMAILFORCEOVERRIDE    => get_string('setting_email_option_force_override', 'auth_companion'),
             gl::EMAILOPTIONALOVERRIDE => get_string('setting_email_option_optional', 'auth_companion'),
-        );
+        ];
     }
     $settings->add(
         new admin_setting_configselect(
@@ -87,5 +85,4 @@ if ($ADMIN->fulltree) {
 
     display_auth_lock_options($settings, $authplugin->authtype,
         $authplugin->userfields, get_string('auth_fieldlocks_help', 'auth'), false, false);
-
 }

@@ -15,11 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace auth_companion\form;
-use \auth_companion\globals as gl;
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Base form class.
@@ -30,11 +29,10 @@ require_once($CFG->libdir.'/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class base extends \moodleform implements \renderable, \templatable {
-
     /**
      * Get the form output as html.
      *
-     * @param \renderer_base $output
+     * @param  \renderer_base $output
      * @return string
      */
     public function export_for_template(\renderer_base $output) {
@@ -42,7 +40,7 @@ abstract class base extends \moodleform implements \renderable, \templatable {
         $this->display();
         $data = ob_get_contents();
         ob_end_clean();
+
         return $data;
     }
-
 }

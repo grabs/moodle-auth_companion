@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->libdir.'/authlib.php');
-use \auth_companion\globals as gl;
+require_once($CFG->libdir . '/authlib.php');
+use auth_companion\globals as gl;
 
 /**
  * Plugin for no authentication - disabled user.
@@ -27,16 +27,15 @@ use \auth_companion\globals as gl;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class auth_plugin_companion extends auth_plugin_base {
-
     /** Component name of this plugin */
-    public const COMPONENT = 'auth_'.gl::AUTH;
+    public const COMPONENT = 'auth_' . gl::AUTH;
 
     /**
      * Constructor.
      */
     public function __construct() {
         $this->authtype = gl::AUTH;
-        $this->config = get_config(self::COMPONENT);
+        $this->config   = get_config(self::COMPONENT);
 
         // Force some profile fields to locked.
         $this->config->field_lock_firstname = 'locked';
@@ -44,9 +43,9 @@ class auth_plugin_companion extends auth_plugin_base {
         $this->config->field_lock_email     = 'locked';
 
         // Remove the forced locked fields from internal userfields list.
-        $userfields = $this->userfields;
-        $this->userfields = array();
-        $fieldstoremove = array('firstname', 'lastname', 'email');
+        $userfields       = $this->userfields;
+        $this->userfields = [];
+        $fieldstoremove   = ['firstname', 'lastname', 'email'];
         foreach ($userfields as $field) {
             if (in_array($field, $fieldstoremove)) {
                 continue;
@@ -68,9 +67,9 @@ class auth_plugin_companion extends auth_plugin_base {
     /**
      * Do not allow any login.
      *
-     * @param string $username
-     * @param string $password
-     * @return bool This will always be false
+     * @param  string $username
+     * @param  string $password
+     * @return bool   This will always be false
      */
     public function user_login($username, $password) {
         return false;
@@ -79,8 +78,8 @@ class auth_plugin_companion extends auth_plugin_base {
     /**
      * No password updates.
      *
-     * @param \stdClass $user
-     * @param string $newpassword
+     * @param  \stdClass $user
+     * @param  string    $newpassword
      * @return bool
      */
     public function user_update_password($user, $newpassword) {
@@ -88,7 +87,7 @@ class auth_plugin_companion extends auth_plugin_base {
     }
 
     /**
-     * Prevent local passwords
+     * Prevent local passwords.
      *
      * @return bool
      */
@@ -135,13 +134,13 @@ class auth_plugin_companion extends auth_plugin_base {
      * User accounts with authentication type set to companion are disabled accounts.
      * They cannot change their password.
      *
-     * @param stdClass $user A user object
+     * @param  stdClass $user A user object
      * @return string[] An array of strings with keys subject and message
      */
-    public function get_password_change_info(stdClass $user) : array {
+    public function get_password_change_info(stdClass $user): array {
         $site = get_site();
 
-        $data = new stdClass();
+        $data            = new stdClass();
         $data->firstname = $user->firstname;
         $data->lastname  = $user->lastname;
         $data->username  = $user->username;
@@ -153,9 +152,7 @@ class auth_plugin_companion extends auth_plugin_base {
 
         return [
             'subject' => $subject,
-            'message' => $message
+            'message' => $message,
         ];
     }
 }
-
-

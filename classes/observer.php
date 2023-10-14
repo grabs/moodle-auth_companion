@@ -15,7 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace auth_companion;
-use \auth_companion\globals as gl;
+
+use auth_companion\globals as gl;
 
 /**
  * Observer for events.
@@ -26,12 +27,11 @@ use \auth_companion\globals as gl;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observer {
-
     /**
      * Delete linked companion accounts for the deleted user.
      *
-     * @param \core\event\user_deleted $event
-     * @return boolean
+     * @param  \core\event\user_deleted $event
+     * @return bool
      */
     public static function user_deleted(\core\event\user_deleted $event) {
         global $DB;
@@ -39,14 +39,14 @@ class observer {
         if (!is_enabled_auth(gl::AUTH)) {
             return true;
         }
-        $userid = $event->objectid;
+        $userid      = $event->objectid;
         $deleteduser = $event->get_record_snapshot('user', $userid);
         if ($deleteduser->auth == gl::AUTH) {
             return; // Companion accounts do not have a companion too.
         }
 
         // Is there a related companion account?
-        if ($companionrecord = $DB->get_record('auth_companion_accounts', array('mainuserid' => $userid))) {
+        if ($companionrecord = $DB->get_record('auth_companion_accounts', ['mainuserid' => $userid])) {
             \auth_companion\util::delete_companionuser($companionrecord->companionid);
         }
     }

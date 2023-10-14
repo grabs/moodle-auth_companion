@@ -15,7 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace auth_companion\form;
-use \auth_companion\globals as gl;
+
+use auth_companion\globals as gl;
 
 /**
  * Confirmation form.
@@ -26,7 +27,6 @@ use \auth_companion\globals as gl;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class confirmation extends base {
-
     /** @var string The values can be 'enter' or 'leave'. */
     protected $type;
     /** @var \array */
@@ -38,13 +38,12 @@ class confirmation extends base {
      * @return void
      */
     public function definition() {
-
-        $mform = $this->_form;
+        $mform      = $this->_form;
         $customdata = $this->_customdata;
-        $courseid = (int) ($customdata['courseid'] ?? 0);
+        $courseid   = (int) ($customdata['courseid'] ?? 0);
 
-        $this->type = $customdata['type'] ?? '';
-        $this->companionroles = $customdata['companionroles'] ?? array();
+        $this->type           = $customdata['type'] ?? '';
+        $this->companionroles = $customdata['companionroles'] ?? [];
 
         $backurl = $customdata['backurl'] ?? '/';
         $backurl = new \moodle_url($backurl);
@@ -79,10 +78,10 @@ class confirmation extends base {
     /**
      * Validation of submitted content.
      *
-     * @param array $data array of ("fieldname"=>value) of submitted data
-     * @param array $files array of uploaded files "element_name"=>tmp_file_path
+     * @param  array $data  array of ("fieldname"=>value) of submitted data
+     * @param  array $files array of uploaded files "element_name"=>tmp_file_path
      * @return array of "element_name"=>"error_description" if there are errors,
-     *         or an empty array if everything is OK (true allowed for backwards compatibility too).
+     *               or an empty array if everything is OK (true allowed for backwards compatibility too)
      */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
@@ -94,13 +93,14 @@ class confirmation extends base {
                 $errors['companionrole'] = get_string('wrong_or_missing_role', 'auth_companion');
             }
         }
+
         return $errors;
     }
 
     /**
-     * Add the additional elements to the form
+     * Add the additional elements to the form.
      *
-     * @param \MoodleQuickForm $mform
+     * @param  \MoodleQuickForm $mform
      * @return void
      */
     protected function add_enter_elements($mform) {
@@ -117,12 +117,10 @@ class confirmation extends base {
                 $mform->setType('emailoverride', PARAM_BOOL);
                 $mform->setConstant('emailoverride', 1);
                 break;
-
             case gl::EMAILOPTIONALOVERRIDE:
                 $notice = get_string('switch_to_companion_note_email_override_optional', 'auth_companion');
                 $mform->addElement('checkbox', 'emailoverride', get_string('override_email', 'auth_companion'));
                 break;
-
             case gl::EMAILNOOVERRIDE:
             default:
                 $mform->addElement('hidden', 'emailoverride', 0);
@@ -140,9 +138,9 @@ class confirmation extends base {
     }
 
     /**
-     * Add the additional elements to the form
+     * Add the additional elements to the form.
      *
-     * @param \MoodleQuickForm $mform
+     * @param  \MoodleQuickForm $mform
      * @return void
      */
     protected function add_leave_elements($mform) {
@@ -156,6 +154,5 @@ class confirmation extends base {
         } else {
             $mform->addElement('checkbox', 'deletedata', get_string('delete_data', 'auth_companion'));
         }
-
     }
 }

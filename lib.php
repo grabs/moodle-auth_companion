@@ -23,7 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use \auth_companion\globals as gl;
+use auth_companion\globals as gl;
 
 /**
  * Allow plugins to provide some content to be rendered in the navbar.
