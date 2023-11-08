@@ -108,6 +108,8 @@ class confirmation extends base {
         $mycfg = gl::mycfg();
 
         $mform->addElement('select', 'companionrole', get_string('companionrole', 'auth_companion'), $this->companionroles);
+        $mform->addRule('companionrole', null, 'required', null, 'client');
+        $mform->setDefault('companionrole', $mycfg->defaultrole ?? '');
 
         $notice = '';
         switch ($mycfg->emailoverride) {

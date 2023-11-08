@@ -27,6 +27,7 @@ use auth_companion\globals as gl;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class util {
+
     /**
      * Modify the user menu by adding the "switch to" or "switch back" buttons.
      *
@@ -222,15 +223,33 @@ class util {
      * @param  \context $context
      * @return array    the roles array with localized names
      */
-    public static function get_roles_options(string $capability, \context $context) {
-        if (!$roles = get_roles_with_capability($capability, CAP_ALLOW, $context)) {
-            return [];
-        }
+    public static function get_roles_options(string $capability, \context $context = null) {
         $return = [];
+
+        if (!$roles = get_roles_with_capability($capability, CAP_ALLOW, $context)) {
+            return $return;
+        }
         foreach ($roles as $role) {
             $return[$role->id] = $role->shortname;
         }
 
-        return role_fix_names($return, $context);
+        $roles = role_fix_names($return, $context);
+        $roles = ['' => get_string('choose')] + $roles;
+        return $roles;
+    }
+
+    /**
+     * Get the role id of a given shortname.
+     *
+     * @param string $shortname
+     * @return int|bool The role id or false if $shortname does not exist.
+     */
+    public static function get_roleid_from_name(string $shortname) {
+        global $DB;
+
+        if ($roleid = $DB->get_field('role', 'id', ['shortname' => $shortname])) {
+            return $roleid;
+        }
+        return false;
     }
 }

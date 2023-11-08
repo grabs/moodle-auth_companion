@@ -80,6 +80,17 @@ if ($ADMIN->fulltree) {
         )
     );
 
+    $options = \auth_companion\util::get_roles_options('auth/companion:useascompanion');
+    $settings->add(
+        new admin_setting_configselect(
+            'auth_companion/defaultrole',
+            get_string('defaultrole', 'role'),
+            get_string('companionrole_definition', 'auth_companion'),
+            \auth_companion\util::get_roleid_from_name('student'),
+            $options
+        )
+    );
+
     // Display locking / mapping of profile fields.
     $authplugin = get_auth_plugin(gl::AUTH);
 

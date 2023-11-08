@@ -27,6 +27,7 @@ $string['clean_old_companion_accounts']                     = 'Clean old compani
 $string['companion:allowcompanion']                         = 'Allow companion account';
 $string['companion:useascompanion']                         = 'Use this role for companion account';
 $string['companionrole']                                    = 'Companion role';
+$string['companionrole_definition']                         = 'To define available roles, set the capability "auth/companion:useascompanion" to "Allow".';
 $string['delete_data']                                      = 'Delete data';
 $string['info_using_companion']                             = 'You are now using your companion account "<strong>{$a}</strong>".';
 $string['info_using_origin']                                = 'You are now using your origin account "<strong>{$a}</strong>".';
