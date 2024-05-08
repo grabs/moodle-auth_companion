@@ -1,5 +1,8 @@
 ## Release notes
 
+### Version v4.4.3
+* Add $plugin->maturity
+
 ### Version v4.4.2
 * Apply new moodle coding style
 
