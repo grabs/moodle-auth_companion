@@ -1,5 +1,8 @@
 ## Release notes
 
+### Version v4.4.1
+* Hide companion icon in navbar if the plugin is deactivated (#5)
+
 ### Version v4.3
 * Add icon for quick access to the usermenu on top of the page.
 * Apply new coding style rules for arrays.
