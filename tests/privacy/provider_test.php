@@ -30,7 +30,7 @@ use core_privacy\tests\provider_testcase;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass \auth_companion\privacy\provider
  */
-class provider_test extends provider_testcase {
+final class provider_test extends provider_testcase {
     /**
      * Set up method.
      */
@@ -44,7 +44,7 @@ class provider_test extends provider_testcase {
      *
      * @covers ::get_contexts_for_userid
      */
-    public function test_get_contexts_for_userid() {
+    public function test_get_contexts_for_userid(): void {
         $user = $this->getDataGenerator()->create_user();
         $this->assertEmpty(provider::get_contexts_for_userid($user->id));
 
@@ -63,7 +63,7 @@ class provider_test extends provider_testcase {
      *
      * @covers ::export_user_data
      */
-    public function test_export_user_data() {
+    public function test_export_user_data(): void {
         $user = $this->getDataGenerator()->create_user();
 
         $companion   = new \auth_companion\companion($user);
@@ -86,7 +86,7 @@ class provider_test extends provider_testcase {
      *
      * @covers ::delete_data_for_all_users_in_context
      */
-    public function test_delete_data_for_all_users_in_context() {
+    public function test_delete_data_for_all_users_in_context(): void {
         global $DB;
 
         $user1        = $this->getDataGenerator()->create_user();
@@ -118,7 +118,7 @@ class provider_test extends provider_testcase {
      *
      * @covers ::delete_data_for_user
      */
-    public function test_delete_data_for_user() {
+    public function test_delete_data_for_user(): void {
         global $DB;
         $user1        = $this->getDataGenerator()->create_user();
         $companion1   = new \auth_companion\companion($user1);
@@ -150,7 +150,7 @@ class provider_test extends provider_testcase {
      *
      * @covers ::get_users_in_context
      */
-    public function test_get_users_in_context() {
+    public function test_get_users_in_context(): void {
         $user        = $this->getDataGenerator()->create_user();
         $contextlist = provider::get_contexts_for_userid($user->id);
         $usercontext = \context_user::instance($user->id);
@@ -182,7 +182,7 @@ class provider_test extends provider_testcase {
      *
      * @covers ::delete_data_for_users
      */
-    public function test_delete_data_for_users() {
+    public function test_delete_data_for_users(): void {
         $component    = 'auth_companion';
         $user1        = $this->getDataGenerator()->create_user();
         $usercontext1 = \context_user::instance($user1->id);

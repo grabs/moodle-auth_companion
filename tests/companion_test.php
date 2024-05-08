@@ -26,14 +26,14 @@ use auth_companion\globals as gl;
  * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class companion_test extends \advanced_testcase {
+final class companion_test extends \advanced_testcase {
     /**
      * Test create a companion account.
      *
      * @covers \auth_companion\companion::__construct
      * @return void
      */
-    public function test_create_companion_account() {
+    public function test_create_companion_account(): void {
         global $DB, $USER;
 
         $this->resetAfterTest();
@@ -68,7 +68,7 @@ class companion_test extends \advanced_testcase {
      * @covers \auth_companion\util::delete_companionuser
      * @return void
      */
-    public function test_delete_companion_account() {
+    public function test_delete_companion_account(): void {
         global $DB, $USER;
 
         $this->resetAfterTest();

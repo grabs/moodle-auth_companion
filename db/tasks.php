@@ -20,7 +20,7 @@
  * @package   auth_companion
  * @copyright 2022 Grabs-EDV (https://www.grabs-edv.com)
  * @author    Andreas Grabs <moodle@grabs-edv.de>
- * @license   http:   //www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
 

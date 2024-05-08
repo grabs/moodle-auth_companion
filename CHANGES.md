@@ -1,5 +1,8 @@
 ## Release notes
 
+### Version v4.4.2
+* Apply new moodle coding style
+
 ### Version v4.4.1
 * Hide companion icon in navbar if the plugin is deactivated (#5)
 
