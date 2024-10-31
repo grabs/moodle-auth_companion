@@ -30,7 +30,7 @@ if ($ADMIN->fulltree) {
         new admin_setting_heading(
             'auth_companion/hdr1',
             get_string('general'),
-            new lang_string('auth_companiondescription', 'auth_companion')
+            get_string('auth_companiondescription', 'auth_companion')
         )
     );
     $settings->add(
@@ -77,6 +77,20 @@ if ($ADMIN->fulltree) {
             get_string('setting_email_option_help', 'auth_companion'),
             gl::EMAILNOOVERRIDE,
             $options
+        )
+    );
+
+    $config = get_config('auth_companion');
+    $infotext = '';
+    $urldescwidget = new \auth_companion\output\domainsettingsnote($config);
+    $infotext = $OUTPUT->render($urldescwidget);
+    $settings->add(
+        new \auth_companion\adminsetting_domain(
+            'auth_companion/emaildomain',
+            get_string('setting_emaildomain', 'auth_companion'),
+            $infotext,
+            \auth_companion\util::DEFAULT_EMAILDOMAIN,
+            40
         )
     );
 

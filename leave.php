@@ -29,6 +29,8 @@ require_once(dirname(__DIR__, 2) . '/config.php');
 
 require_login();
 
+\auth_companion\util::require_enabled();
+
 $backurl = optional_param('backurl', '', PARAM_LOCALURL);
 if (empty($backurl)) {
     $backurl = new \moodle_url('/');

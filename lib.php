@@ -33,10 +33,9 @@ use auth_companion\globals as gl;
  * @return string HTML for the navbar
  */
 function auth_companion_render_navbar_output() {
-    if (!is_enabled_auth(gl::AUTH)) {
-        return;
+    if (\auth_companion\util::is_enabled()) {
+        return \auth_companion\util::create_nav_action();
     }
-    return \auth_companion\util::create_nav_action();
 }
 
 /**
@@ -45,10 +44,9 @@ function auth_companion_render_navbar_output() {
  * @param navigation_node $navigation
  */
 function auth_companion_extend_navigation_user_settings(navigation_node $navigation) {
-    if (!is_enabled_auth(gl::AUTH)) {
-        return;
+    if (\auth_companion\util::is_enabled()) {
+        \auth_companion\util::set_user_menu();
     }
-    \auth_companion\util::set_user_menu();
 }
 
 /**

@@ -27,6 +27,8 @@ use auth_companion\globals as gl;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class util {
+    /** Default notsendigemaildomain */
+    const DEFAULT_EMAILDOMAIN = 'companion.invalid';
 
     /**
      * Modify the user menu by adding the "switch to" or "switch back" buttons.
@@ -58,11 +60,14 @@ class util {
         }
 
         // The user is not a companion.
-        if (!has_capability('auth/companion:allowcompanion', $PAGE->context)) {
+        // So we check the other way, whether the user can become a companion.
+
+        // We have to check whether or not the current page is in a course page.
+        if (!static::page_is_in_course()) {
             return;
         }
-        // We have to check whether or not the current page is a course page.
-        if (!static::page_is_course()) {
+        // Do we have the right capability?
+        if (!has_capability('auth/companion:allowcompanion', $PAGE->context)) {
             return;
         }
 
@@ -79,10 +84,11 @@ class util {
     public static function create_nav_action() {
         global $OUTPUT, $PAGE, $FULLME;
 
-        if (!static::page_is_course()) {
+        if (!static::page_is_in_course()) {
             return '';
         }
 
+        // The user is a companion.
         if (static::is_companion()) {
             $backurl = new \moodle_url($FULLME);
             $url     = new \moodle_url('/auth/companion/leave.php', ['backurl' => $backurl->out()]);
@@ -129,16 +135,17 @@ class util {
      *
      * @return bool
      */
-    public static function page_is_course() {
-        global $PAGE;
+    public static function page_is_in_course() {
+        global $COURSE;
 
-        if ($PAGE->context->contextlevel != CONTEXT_COURSE) {
+        // This is a page on which the course is not set and maybe wrong coded.
+        if (empty($COURSE->id)) {
             return false;
         }
-        if ($PAGE->course->id == SITEID) {
+        // This is the frontpage or any other system page.
+        if ($COURSE->id == SITEID) {
             return false;
         }
-
         return true;
     }
 
@@ -172,11 +179,13 @@ class util {
             'mnethostid' => $CFG->mnet_localhost_id,
         ];
         if ($user = $DB->get_record('user', $params, '*', IGNORE_MISSING)) {
+            $emaildomain = empty($mycfg->emaildomain) ? static::DEFAULT_EMAILDOMAIN : $mycfg->emaildomain;
+
             // First we anonymize the username and email.
             $anonymousname   = $mycfg->anonymousname ?? 'anonymous';
             $user->firstname = $anonymousname;
             $user->lastname  = $anonymousname;
-            $user->email     = $anonymousname . '.' . $anonymousname . '@auth-companion.invalid';
+            $user->email     = $anonymousname . '.' . $anonymousname . '@auth-' . $emaildomain;
             $DB->update_record('user', $user);
 
             if (!delete_user($user)) {
@@ -220,10 +229,10 @@ class util {
      * Get role options for usage in a select form element.
      *
      * @param  string   $capability
-     * @param  \context $context
+     * @param  ?\context $context
      * @return array    the roles array with localized names
      */
-    public static function get_roles_options(string $capability, \context $context = null) {
+    public static function get_roles_options(string $capability, ?\context $context = null) {
         $return = [];
 
         if (!$roles = get_roles_with_capability($capability, CAP_ALLOW, $context)) {
@@ -251,5 +260,44 @@ class util {
             return $roleid;
         }
         return false;
+    }
+
+    /**
+     * Checks if the given email domain is valid for the auth_companion plugin.
+     *
+     * @param string $domain The email domain to validate.
+     * @return bool True if the email domain is valid, false otherwise.
+     */
+    public static function validate_emaildomain($domain): bool {
+        $dummyaddress = 'dummy@' . $domain;
+        return validate_email($dummyaddress);
+    }
+
+    /**
+     * Checks if the auth_companion plugin is enabled.
+     *
+     * @return bool True if the auth_companion plugin is enabled, false otherwise.
+     */
+    public static function is_enabled(): bool {
+        $config = get_config('auth_companion');
+        if (!is_enabled_auth(gl::AUTH)) {
+            return false;
+        }
+        if (!static::validate_emaildomain($config->emaildomain)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Require that the auth_companion plugin is enabled.
+     *
+     * This method throws a moodle_exception if the auth_companion plugin is not enabled.
+     */
+    public static function require_enabled() {
+        if (static::is_enabled()) {
+            return;
+        }
+        throw new \moodle_exception('auth_companion_disabled');
     }
 }

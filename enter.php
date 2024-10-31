@@ -27,6 +27,8 @@ require_once(dirname(__DIR__, 2) . '/config.php');
 
 require_login();
 
+\auth_companion\util::require_enabled();
+
 $courseid = required_param('courseid', PARAM_INT);
 
 if (!$course = $DB->get_record('course', ['id' => $courseid])) {

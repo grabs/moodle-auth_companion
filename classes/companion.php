@@ -197,9 +197,11 @@ class companion {
         global $DB;
         $mycfg = gl::mycfg();
 
+        $emaildomain = empty($mycfg->emaildomain) ? util::DEFAULT_EMAILDOMAIN : $mycfg->emaildomain;
+
         $this->companion->firstname = $this->mainuser->firstname;
         $this->companion->lastname  = $this->mainuser->lastname . ' ' . $mycfg->namesuffix;
-        $this->companion->email     = $this->companion->username . '@companion.invalid';
+        $this->companion->email     = $this->companion->username . '@' . $emaildomain;
 
         return $DB->update_record('user', $this->companion);
     }
