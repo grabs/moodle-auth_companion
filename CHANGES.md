@@ -1,5 +1,9 @@
 ## Release notes
 
+### Version v4.5.1
+* Fix: Undefined property: stdClass::$auth (#6)
+* Make github actions more restrictive
+
 ### Version v4.5.0
 * Compatibility to Moodle 4.5
 * Switch icon now is shown on all course and activity pages

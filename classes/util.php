@@ -127,7 +127,12 @@ class util {
             $user = $USER;
         }
 
-        return $USER->auth == gl::AUTH;
+        // In some circumstances, the user object may not have an auth property or is completely empty.
+        if (empty($user->auth)) {
+            return false;
+        }
+
+        return $user->auth == gl::AUTH;
     }
 
     /**
