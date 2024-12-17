@@ -1,5 +1,9 @@
 ## Release notes
 
+### Version v4.5.2
+* New feature: Use groups for companion user (#7)
+* Fix: Incorrectly displays the switch user icon for students (#8)
+
 ### Version v4.5.1
 * Fix: Undefined property: stdClass::$auth (#6)
 * Make github actions more restrictive
