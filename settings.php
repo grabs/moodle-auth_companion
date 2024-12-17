@@ -105,6 +105,17 @@ if ($ADMIN->fulltree) {
         )
     );
 
+    $options = \auth_companion\util::get_settings_group_options();
+    $settings->add(
+        new admin_setting_configselect(
+            'auth_companion/groupdefault',
+            get_string('setting_group_default', 'auth_companion'),
+            '',
+            gl::MYGROUPS,
+            $options
+        )
+    );
+
     // Display locking / mapping of profile fields.
     $authplugin = get_auth_plugin(gl::AUTH);
 

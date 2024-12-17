@@ -97,11 +97,18 @@ class companion {
      *
      * @param  \stdClass         $course The course the account is enrolled to
      * @param  int               $roleid
+     * @param  mixed             $groupid The value '-1' means all groups of that user. The value '' means no group.
      * @throws \moodle_exception
      * @return void
      */
-    public function enrol($course, $roleid) {
+    public function enrol($course, $roleid, $groupid) {
+        global $CFG;
+
+        require_once($CFG->dirroot. '/group/lib.php');
+
         $manual = enrol_get_plugin('manual');
+
+        $groupstoenrol = \auth_companion\util::get_groups_from_id($course->id, $groupid, $this->mainuser->id);
 
         $coursecontext = \context_course::instance($course->id);
         $instancefound = false;
@@ -124,6 +131,17 @@ class companion {
         ];
         role_unassign_all($unassignparams, true);
         role_assign($roleid, $this->companion->id, $coursecontext->id);
+
+        if ($allgroups = groups_get_all_groups($course->id)) {
+            // Remove from all groups and then join the selected groups.
+            foreach ($allgroups as $group) {
+                groups_remove_member($group->id, $this->companion->id);
+            }
+            // Now join the selected groups.
+            foreach ($groupstoenrol as $group) {
+                groups_add_member($group->id, $this->companion->id);
+            }
+        }
     }
 
     /**

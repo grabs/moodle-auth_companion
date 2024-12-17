@@ -34,6 +34,8 @@ class globals {
     public const EMAILFORCEOVERRIDE    = 'emailforceoverride';
     /** Override constant - Optional override the email address */
     public const EMAILOPTIONALOVERRIDE = 'emailoptionaloverride';
+    /** Constant for use of 'my groups' */
+    public const MYGROUPS              = -1;
 
     /**
      * Returns the plugin configuration.

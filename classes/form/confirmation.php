@@ -31,6 +31,8 @@ class confirmation extends base {
     protected $type;
     /** @var \array */
     protected $companionroles;
+    /** @var int */
+    protected $courseid;
 
     /**
      * Form definition.
@@ -40,8 +42,8 @@ class confirmation extends base {
     public function definition() {
         $mform      = $this->_form;
         $customdata = $this->_customdata;
-        $courseid   = (int) ($customdata['courseid'] ?? 0);
 
+        $this->courseid       = (int) ($customdata['courseid'] ?? 0);
         $this->type           = $customdata['type'] ?? '';
         $this->companionroles = $customdata['companionroles'] ?? [];
 
@@ -50,7 +52,7 @@ class confirmation extends base {
 
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
-        $mform->setConstant('courseid', $courseid);
+        $mform->setConstant('courseid', $this->courseid);
 
         $mform->addElement('hidden', 'backurl');
         $mform->setType('backurl', PARAM_LOCALURL);
@@ -92,6 +94,14 @@ class confirmation extends base {
             if (empty($this->companionroles) || !in_array($data->companionrole, array_keys($this->companionroles))) {
                 $errors['companionrole'] = get_string('wrong_or_missing_role', 'auth_companion');
             }
+
+            // Prevent injection of a wrong group id.
+            $group = $data->group ?? '';
+            if ($groupmenu = \auth_companion\util::get_groups_menu($this->courseid)) {
+                if (empty($groupmenu[$group])) {
+                    $errors['companionrole'] = get_string('error_invalid_group', 'auth_companion');
+                }
+            }
         }
 
         return $errors;
@@ -104,12 +114,16 @@ class confirmation extends base {
      * @return void
      */
     protected function add_enter_elements($mform) {
-        global $CFG;
         $mycfg = gl::mycfg();
 
         $mform->addElement('select', 'companionrole', get_string('companionrole', 'auth_companion'), $this->companionroles);
         $mform->addRule('companionrole', null, 'required', null, 'client');
         $mform->setDefault('companionrole', $mycfg->defaultrole ?? '');
+
+        if ($groupmenu = \auth_companion\util::get_groups_menu($this->courseid)) {
+            $mform->addElement('select', 'group', get_string('group'), $groupmenu);
+            $mform->setDefault('group', $mycfg->groupdefault ?? gl::MYGROUPS);
+        }
 
         $notice = '';
         switch ($mycfg->emailoverride) {

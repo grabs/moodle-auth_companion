@@ -76,8 +76,10 @@ if ($data = $confirmform->get_data()) {
     $user = $companion->login();
     // Now you are logged in as companion.
 
+    $usergroup = empty($data->group) ? 0 : $data->group;
+
     $redirecturl = new \moodle_url('/course/view.php', ['id' => $course->id]);
-    $companion->enrol($course, $data->companionrole);
+    $companion->enrol($course, $data->companionrole, $usergroup);
     $notificationtext = get_string('info_using_companion', 'auth_companion', fullname($user));
     \core\notification::add($notificationtext, \core\notification::SUCCESS);
     redirect($redirecturl);

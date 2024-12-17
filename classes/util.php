@@ -36,7 +36,7 @@ class util {
      * @return void
      */
     public static function set_user_menu() {
-        global $CFG, $PAGE, $FULLME;
+        global $CFG, $PAGE, $FULLME, $COURSE;
 
         // Do not manipulate the custum user menu on an admin page.
         if (preg_match('#^admin.*#', $PAGE->pagetype)) {
@@ -66,8 +66,15 @@ class util {
         if (!static::page_is_in_course()) {
             return;
         }
+
+        if ($COURSE->id == SITEID) {
+            return '';
+        }
+
+        $coursecontext = \context_course::instance($COURSE->id);
+
         // Do we have the right capability?
-        if (!has_capability('auth/companion:allowcompanion', $PAGE->context)) {
+        if (!has_capability('auth/companion:allowcompanion', $coursecontext)) {
             return;
         }
 
@@ -82,11 +89,17 @@ class util {
      * @return string The html
      */
     public static function create_nav_action() {
-        global $OUTPUT, $PAGE, $FULLME;
+        global $OUTPUT, $PAGE, $FULLME, $COURSE;
 
         if (!static::page_is_in_course()) {
             return '';
         }
+
+        if ($COURSE->id == SITEID) {
+            return '';
+        }
+
+        $coursecontext = \context_course::instance($COURSE->id);
 
         // The user is a companion.
         if (static::is_companion()) {
@@ -95,7 +108,7 @@ class util {
             $text    = get_string('switch_back', 'auth_companion');
             $pixicon = 'companionon';
         } else {
-            if (!has_capability('auth/companion:allowcompanion', $PAGE->context)) {
+            if (!has_capability('auth/companion:allowcompanion', $coursecontext)) {
                 return '';
             }
 
@@ -250,6 +263,115 @@ class util {
         $roles = role_fix_names($return, $context);
         $roles = ['' => get_string('choose')] + $roles;
         return $roles;
+    }
+
+    /**
+     * Get the group menu options for a given course.
+     *
+     * This function retrieves all groups associated with the given course and prepares an array
+     * for use in a select form element. The array includes default entries for choosing a group
+     * and for selecting all groups of the current user.
+     *
+     * @param int $courseid The ID of the course for which to retrieve groups.
+     * @param int $userid The ID of the user the groups are available for. If '0' the current user ID is used.
+     * @return array An associative array of group IDs and names, suitable for use in a select form element.
+     *               If no groups are found, an empty array is returned.
+     */
+    public static function get_groups_menu(int $courseid, int $userid = 0) {
+        global $USER;
+
+        if (empty($userid)) {
+            $userid = $USER->id;
+        }
+
+        $context = \context_course::instance($courseid);
+
+        // Check if the user has the capability to access all groups in the course.
+        if (has_capability('moodle/site:accessallgroups', $context)) {
+            $groups = groups_get_all_groups($courseid);
+        } else {
+            // If not, retrieve only the groups the current user is enrolled in.
+            $groups = groups_get_all_groups($courseid, $userid);
+        }
+
+        // If no groups are found, return an empty array.
+        if (empty($groups)) {
+            return [];
+        }
+
+        // Define the default entries in the group menu.
+        // The value '-1' means all groups of that user will be used.
+        $groupmenu = [
+            '' => get_string('nogroup', 'group'),
+            -1 => get_string('mygroups', 'group'),
+        ];
+
+        // Add the retrieved groups to the group menu array.
+        foreach ($groups as $group) {
+            $groupmenu[$group->id] = $group->name;
+        }
+
+        // Return the completed group menu array.
+        return $groupmenu;
+    }
+
+    /**
+     * Get the group menu options for the companion plugin settings.
+     *
+     * This function prepares an array for use in a select form element in the companion plugin settings.
+     * The array includes default entries for choosing a group and for selecting all groups of the current user.
+     *
+     * @return array An associative array of group IDs and names, suitable for use in a select setting element.
+     *               The array will always contain at least two entries:
+     *               - An empty string ('') with the localized string 'nogroup'
+     *               - A constant MYGROUPS (-1) with the localized string 'mygroups'
+     */
+    public static function get_settings_group_options() {
+        $groupmenu = [
+            '' => get_string('nogroup', 'group'),
+            gl::MYGROUPS => get_string('mygroups', 'group'),
+        ];
+        return $groupmenu;
+    }
+
+    /**
+     * Retrieves groups based on the given course ID, group ID, and user ID.
+     *
+     * @param int $courseid The ID of the course for which to retrieve groups.
+     * @param int $groupid The ID of the group to retrieve. If this value is equal to MYGROUPS,
+     *                      all groups of the current user will be retrieved. If this value is empty,
+     *                      no groups will be retrieved.
+     * @param int $userid The ID of the user the groups are available for. If '0' the current user ID is used.
+     * @return array An associative array of group IDs and corresponding group objects.
+     *               If no groups are found, an empty array is returned.
+     */
+    public static function get_groups_from_id($courseid, $groupid, $userid) {
+        $groups = [];
+
+        // No group selected.
+        if (empty($groupid)) {
+            return $groups;
+        }
+
+        // My groups selected.
+        if ($groupid == gl::MYGROUPS) {
+            $groupmenu = static::get_groups_menu($courseid, $userid);
+            foreach (array_keys($groupmenu) as $availablegroupid) {
+                // Remove the first two options.
+                if (empty($availablegroupid) || ($availablegroupid <= 0)) {
+                    continue;
+                }
+                if ($group = groups_get_group($availablegroupid)) {
+                    $groups[$availablegroupid] = $group;
+                }
+            }
+        } else {
+            // A single group selected.
+            if ($group = groups_get_group($groupid)) {
+                $groups[$groupid] = $group;
+            }
+        }
+        return $groups;
     }
 
     /**
