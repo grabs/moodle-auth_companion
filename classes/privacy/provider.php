@@ -34,7 +34,7 @@ use core_privacy\local\request\writer;
  * @author     Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements local\metadata\provider, local\request\plugin\provider, local\request\core_userlist_provider {
+class provider implements local\metadata\provider, local\request\core_userlist_provider, local\request\plugin\provider {
     /**
      * Get all contexts contain user information for the given user.
      *

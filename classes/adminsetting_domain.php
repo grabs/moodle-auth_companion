@@ -25,7 +25,6 @@ namespace auth_companion;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class adminsetting_domain extends \admin_setting_configtext {
-
     /**
      * Config text constructor
      *
@@ -35,7 +34,7 @@ class adminsetting_domain extends \admin_setting_configtext {
      * @param string $defaultsetting
      * @param int $size default field size
      */
-    public function __construct($name, $visiblename, $description, $defaultsetting, $size=null) {
+    public function __construct($name, $visiblename, $description, $defaultsetting, $size = null) {
         parent::__construct($name, $visiblename, $description, $defaultsetting, PARAM_RAW, $size);
     }
 

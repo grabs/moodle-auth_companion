@@ -102,9 +102,9 @@ class companion {
      * @return void
      */
     public function enrol($course, $roleid, $groupid) {
-        global $CFG;
+        global $CFG, $DB;
 
-        require_once($CFG->dirroot. '/group/lib.php');
+        require_once($CFG->dirroot . '/group/lib.php');
 
         $manual = enrol_get_plugin('manual');
 
@@ -124,7 +124,12 @@ class companion {
             throw new \moodle_exception('No manual instance found!');
         }
 
+        // Prevent moodle from sending a welcome message by temporary suspending the companion user.
+        $DB->set_field('user', 'suspended', 1, ['id' => $this->companion->id]);
         $manual->enrol_user($instance, $this->companion->id, null, 0, 0);
+        // Set back the suspended flag.
+        $DB->set_field('user', 'suspended', 0, ['id' => $this->companion->id]);
+
         $unassignparams = [
             'userid'    => $this->companion->id,
             'contextid' => $coursecontext->id,

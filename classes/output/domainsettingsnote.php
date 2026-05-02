@@ -41,7 +41,7 @@ class domainsettingsnote implements \renderable, \templatable {
                 break;
             case !\auth_companion\util::validate_emaildomain($config->emaildomain):
                 $this->data['errmsg'] = get_string('error_wrong_emaildomain', 'auth_companion') .
-                                    ' - ' . get_string('info_plugin_remains_deactivated', 'auth_companion');;
+                                    ' - ' . get_string('info_plugin_remains_deactivated', 'auth_companion');
                 break;
         }
     }
