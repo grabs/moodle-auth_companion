@@ -1,5 +1,8 @@
 ## Release notes
 
+### Version v4.5.3
+* Prevent the welcome email from being sent to suppress the warnings while in debugging mode.
+
 ### Version v4.5.2
 * New feature: Use groups for companion user (#7)
 * Fix: Incorrectly displays the switch user icon for students (#8)
